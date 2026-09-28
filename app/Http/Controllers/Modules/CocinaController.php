@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Modules;
 
+use App\Events\PedidoCambio;
 use App\Http\Controllers\Controller;
 use App\Models\Pedido;
 use Illuminate\Http\Request;
@@ -66,6 +67,7 @@ class CocinaController extends Controller
             default      => $pedido->estado,
         };
         $pedido->update(['estado' => $siguiente]);
+        event(new PedidoCambio($pedido->fresh(['mesa', 'items']), 'cocina'));
 
         return response()->json(['ok' => true, 'estado' => $siguiente]);
     }

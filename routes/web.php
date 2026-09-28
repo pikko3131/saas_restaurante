@@ -13,6 +13,7 @@ use App\Http\Controllers\Modules\ConfiguracionController;
 use App\Http\Controllers\Modules\InsumoController;
 use App\Http\Controllers\Modules\KardexController;
 use App\Http\Controllers\Modules\MesaController;
+use App\Http\Controllers\Modules\MeseroController;
 use App\Http\Controllers\Modules\PedidoController;
 use App\Http\Controllers\Modules\PosController;
 use App\Http\Controllers\Modules\ProductoController;
@@ -64,6 +65,11 @@ Route::middleware(['auth', 'tenant'])->group(function () {
 
         Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
         Route::post('/pos', [PosController::class, 'store'])->name('pos.store');
+
+        Route::middleware('role:mesero,admin,cajero')->group(function () {
+            Route::get('/mesero', [MeseroController::class, 'index'])->name('mesero.index');
+            Route::get('/mesero/live', [MeseroController::class, 'live'])->name('mesero.live');
+        });
 
         Route::resource('mesas', MesaController::class);
         Route::resource('reservas', ReservaController::class);

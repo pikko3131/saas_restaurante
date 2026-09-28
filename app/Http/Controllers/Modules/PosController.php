@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Modules;
 
+use App\Events\PedidoCambio;
 use App\Http\Controllers\Controller;
 use App\Models\Categoria;
 use App\Models\Cliente;
@@ -136,6 +137,8 @@ class PosController extends Controller
 
             return $pedido;
         });
+
+        event(new PedidoCambio($pedido->fresh(['mesa', 'items']), 'creado'));
 
         return redirect()->route('pedidos.show', $pedido)->with('success', "Pedido {$pedido->codigo} registrado correctamente.");
     }

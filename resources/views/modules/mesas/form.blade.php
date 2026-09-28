@@ -27,6 +27,18 @@
                     <datalist id="zonas"><option>Salon principal</option><option>Terraza</option><option>Privados</option><option>Barra</option></datalist>
                 </div>
                 <div class="sm:col-span-2">
+                    <label class="mb-1.5 block text-sm font-semibold text-slate-700">Mesero asignado</label>
+                    <select name="mesero_id" class="form-input-c">
+                        <option value="">Sin asignar</option>
+                        @foreach(($meseros ?? []) as $mesero)
+                            <option value="{{ $mesero->id }}" @selected(old('mesero_id', $mesa->mesero_id)==$mesero->id)>
+                                {{ $mesero->name }} ({{ $mesero->role }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-xs text-slate-400">Ese mesero verá solo esta mesa en su celular.</p>
+                </div>
+                <div class="sm:col-span-2">
                     <label class="mb-1.5 block text-sm font-semibold text-slate-700">Estado *</label>
                     <select name="estado" class="form-input-c" required>
                         @foreach (['libre'=>'Libre','ocupada'=>'Ocupada','reservada'=>'Reservada','cuenta'=>'Por cobrar'] as $k=>$v)

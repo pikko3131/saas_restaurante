@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PedidoCambio;
 use App\Models\Categoria;
 use App\Models\Mesa;
 use App\Models\Pedido;
@@ -104,6 +105,8 @@ class CartaPublicaController extends Controller
 
             return $pedido;
         });
+
+        event(new PedidoCambio($pedido->fresh(['mesa', 'items']), 'qr'));
 
         return redirect()
             ->route('carta.publica', $restaurante->slug)

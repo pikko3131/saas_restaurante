@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Modules;
 
+use App\Events\PedidoCambio;
 use App\Http\Controllers\Controller;
 use App\Models\Pedido;
 use App\Models\Restaurante;
@@ -61,6 +62,8 @@ class PedidoController extends Controller
             $ganados = $pedido->cliente->acreditarPuntos((float) $pedido->total, $pedido);
             $pedido->update(['puntos_ganados' => $ganados]);
         }
+
+        event(new PedidoCambio($pedido->fresh(['mesa', 'items']), 'estado'));
 
         return back()->with('success', 'Estado del pedido actualizado.');
     }

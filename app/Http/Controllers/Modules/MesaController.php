@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Modules;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mesa;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MesaController extends Controller
@@ -22,7 +23,10 @@ class MesaController extends Controller
 
     public function create()
     {
-        return view('modules.mesas.form', ['mesa' => new Mesa(['capacidad' => 4, 'estado' => 'libre'])]);
+        return view('modules.mesas.form', [
+            'mesa' => new Mesa(['capacidad' => 4, 'estado' => 'libre']),
+            'meseros' => $this->meseros(),
+        ]);
     }
 
     public function store(Request $request)
@@ -37,7 +41,10 @@ class MesaController extends Controller
 
     public function edit(Mesa $mesa)
     {
-        return view('modules.mesas.form', compact('mesa'));
+        return view('modules.mesas.form', [
+            'mesa' => $mesa,
+            'meseros' => $this->meseros(),
+        ]);
     }
 
     public function update(Request $request, Mesa $mesa)
@@ -60,6 +67,12 @@ class MesaController extends Controller
             'capacidad' => 'required|integer|min:1|max:50',
             'zona' => 'required|string|max:50',
             'estado' => 'required|in:libre,ocupada,reservada,cuenta',
+            'mesero_id' => 'nullable|exists:users,id',
         ]);
+    }
+
+    private function meseros()
+    {
+        return User::whereIn('role', ['mesero', 'cajero', 'admin'])->orderBy('name')->get(['id', 'name', 'role']);
     }
 }

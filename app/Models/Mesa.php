@@ -13,8 +13,13 @@ class Mesa extends Model
     protected $table = 'mesas';
 
     protected $fillable = [
-        'restaurante_id', 'numero', 'nombre', 'capacidad', 'zona', 'estado',
+        'restaurante_id', 'numero', 'nombre', 'capacidad', 'zona', 'estado', 'mesero_id',
     ];
+
+    public function mesero()
+    {
+        return $this->belongsTo(User::class, 'mesero_id');
+    }
 
     public function pedidos()
     {
