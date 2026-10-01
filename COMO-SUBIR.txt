@@ -1,0 +1,22 @@
+Cambios para subir a GitHub
+===========================
+
+Esto junta los dos parches:
+- app del mesero (solo sus mesas y pedidos)
+- boton "Ya lo lleve"
+
+Como subirlo
+1. Abre GitHub Desktop y elige el repo saas_restaurante.
+2. Copia estas carpetas ENCIMA de la carpeta del proyecto
+   (la de GitHub Desktop, no solo Laragon):
+   app
+   database
+   resources
+   routes
+3. Cuando pregunte si reemplaza, di que si.
+4. En GitHub Desktop vas a ver archivos cambiados.
+5. Abajo escribe: mesero y ya lo lleve
+6. Commit y Push origin.
+
+No subas el archivo .env ni COMO-SUBIR.txt si no quieres.
+Despues de subir, avisame y lo bajo en el servidor.

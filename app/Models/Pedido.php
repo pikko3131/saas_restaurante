@@ -15,7 +15,7 @@ class Pedido extends Model
     protected $fillable = [
         'restaurante_id', 'codigo', 'mesa_id', 'cliente_id', 'user_id', 'tipo', 'estado',
         'subtotal', 'descuento', 'impuesto', 'total', 'metodo_pago', 'notas', 'pagado_at',
-        'promocion_id', 'puntos_usados', 'puntos_ganados',
+        'entregado_at', 'promocion_id', 'puntos_usados', 'puntos_ganados',
     ];
 
     protected $casts = [
@@ -24,6 +24,7 @@ class Pedido extends Model
         'impuesto' => 'decimal:2',
         'total' => 'decimal:2',
         'pagado_at' => 'datetime',
+        'entregado_at' => 'datetime',
     ];
 
     public function items()
@@ -58,10 +59,6 @@ class Pedido extends Model
         };
     }
 
-    /**
-     * Restaura el inventario consumido por este pedido (al anular/cancelar).
-     * Devuelve insumos según receta y stock de productos que lo controlen.
-     */
     public function restaurarInventario(): void
     {
         $this->loadMissing('items.producto.recetas.insumo');

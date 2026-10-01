@@ -69,6 +69,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::middleware('role:mesero,admin,cajero')->group(function () {
             Route::get('/mesero', [MeseroController::class, 'index'])->name('mesero.index');
             Route::get('/mesero/live', [MeseroController::class, 'live'])->name('mesero.live');
+            Route::post('/mesero/pedidos/{pedido}/llevar', [MeseroController::class, 'llevar'])->name('mesero.llevar');
         });
 
         Route::resource('mesas', MesaController::class);

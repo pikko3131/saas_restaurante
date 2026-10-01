@@ -23,11 +23,7 @@
             </form>
         </div>
         <p class="mt-2 text-xs text-orange-100/80">
-            Solo ves <strong>tus mesas</strong> y los pedidos de esas mesas.
-            <span class="ml-1 inline-flex items-center gap-1">
-                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
-                en vivo
-            </span>
+            Solo ves tus mesas. Cuando cocina marque listo, aparece <strong>Ya lo llevé</strong>.
         </p>
         <div class="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
             <div class="rounded-xl bg-white/10 py-2">
@@ -35,12 +31,12 @@
                 <p class="text-orange-100/70">Mesas</p>
             </div>
             <div class="rounded-xl bg-white/10 py-2">
-                <p class="text-lg font-bold" x-text="ocupadas">0</p>
-                <p class="text-orange-100/70">Ocupadas</p>
+                <p class="text-lg font-bold" x-text="porLlevar.length">0</p>
+                <p class="text-orange-100/70">Por llevar</p>
             </div>
             <div class="rounded-xl bg-white/10 py-2">
                 <p class="text-lg font-bold" x-text="pedidos.length">0</p>
-                <p class="text-orange-100/70">Pedidos</p>
+                <p class="text-orange-100/70">Abiertos</p>
             </div>
         </div>
     </header>
@@ -52,6 +48,7 @@
 
     <main class="flex-1 space-y-3 p-4">
         <p x-show="error" class="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700" x-text="error"></p>
+        <p x-show="ok" class="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700" x-text="ok"></p>
 
         <div x-show="tab==='mesas'" class="grid grid-cols-2 gap-3">
             <template x-for="m in mesas" :key="m.id">
@@ -78,7 +75,7 @@
                 </div>
             </template>
             <p x-show="!mesas.length" class="col-span-2 py-10 text-center text-sm text-slate-400">
-                Aún no te asignaron mesas. Pídele al admin que te asigne mesas en el módulo Mesas.
+                Aún no te asignaron mesas.
             </p>
         </div>
 
@@ -90,7 +87,14 @@
                             <p class="text-sm font-bold" x-text="p.codigo"></p>
                             <p class="text-xs text-slate-500">Mesa <span x-text="p.mesa || '—'"></span> · <span x-text="p.minutos"></span> min</p>
                         </div>
-                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase" x-text="p.estado"></span>
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+                              :class="{
+                                  'bg-amber-100 text-amber-800': p.estado==='pendiente',
+                                  'bg-orange-100 text-orange-800': p.estado==='preparando',
+                                  'bg-emerald-100 text-emerald-800': p.estado==='servido' && !p.entregado,
+                                  'bg-slate-100 text-slate-600': p.entregado
+                              }"
+                              x-text="p.entregado ? 'llevado' : p.estado"></span>
                     </div>
                     <ul class="mt-2 space-y-1 text-sm text-slate-700">
                         <template x-for="(it, i) in p.items" :key="i">
@@ -98,6 +102,12 @@
                         </template>
                     </ul>
                     <p class="mt-2 text-right text-sm font-bold" x-text="'S/ '+Number(p.total||0).toFixed(2)"></p>
+                    <p x-show="p.estado!=='servido' && !p.entregado" class="mt-2 text-xs text-slate-400">Esperando a cocina…</p>
+                    <button x-show="p.puede_llevar" @click="llevar(p)"
+                            class="mt-3 w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-bold text-white">
+                        ✓ Ya lo llevé a la mesa
+                    </button>
+                    <p x-show="p.entregado" class="mt-2 text-center text-xs font-semibold text-emerald-700">Entregado en mesa</p>
                 </article>
             </template>
             <p x-show="!pedidos.length" class="py-10 text-center text-sm text-slate-400">No hay pedidos abiertos en tus mesas.</p>
@@ -107,14 +117,16 @@
 
 <script>
 function meseroApp() {
+    const csrf = document.querySelector('meta[name=csrf-token]').content;
     return {
-        tab: 'mesas',
+        tab: 'pedidos',
         mesas: [],
         pedidos: [],
         error: '',
+        ok: '',
         timer: null,
-        get ocupadas() {
-            return this.mesas.filter(m => m.estado === 'ocupada' || m.pedido).length;
+        get porLlevar() {
+            return this.pedidos.filter(p => p.puede_llevar);
         },
         async load() {
             try {
@@ -128,6 +140,28 @@ function meseroApp() {
                 this.error = '';
             } catch (e) {
                 this.error = e.message || 'Error de conexión';
+            }
+        },
+        async llevar(p) {
+            this.ok = '';
+            this.error = '';
+            try {
+                const r = await fetch(`/mesero/pedidos/${p.id}/llevar`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf
+                    }
+                });
+                const data = await r.json();
+                if (!r.ok) throw new Error(data.mensaje || 'No se pudo marcar');
+                p.entregado = true;
+                p.puede_llevar = false;
+                this.ok = 'Marcado: ya lo llevaste a la mesa ' + (p.mesa || '');
+                this.load();
+            } catch (e) {
+                this.error = e.message;
             }
         },
         init() {
