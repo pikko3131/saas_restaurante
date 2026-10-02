@@ -42,6 +42,10 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/carta/{restaurante:slug}', [CartaPublicaController::class, 'show'])->name('carta.publica');
 Route::post('/carta/{restaurante:slug}/pedido', [CartaPublicaController::class, 'pedido'])->name('carta.pedido');
 
+// Webhooks de Integración Delivery (Rappi & Uber Eats)
+Route::post('/webhooks/rappi', [\App\Http\Controllers\Api\DeliveryWebhookController::class, 'rappi'])->name('webhooks.rappi');
+Route::post('/webhooks/ubereats', [\App\Http\Controllers\Api\DeliveryWebhookController::class, 'ubereats'])->name('webhooks.ubereats');
+
 /*
 |--------------------------------------------------------------------------
 | App del restaurante (tenant)
@@ -80,6 +84,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::resource('pedidos', PedidoController::class)->only(['index', 'show', 'destroy']);
         Route::get('/delivery', [DeliveryController::class, 'index'])->name('delivery.index');
         Route::patch('/delivery/{pedido}/estado', [DeliveryController::class, 'cambiarEstado'])->name('delivery.estado');
+        Route::post('/delivery/simular-plataforma', [\App\Http\Controllers\Api\DeliveryWebhookController::class, 'simular'])->name('delivery.simular');
 
         Route::resource('categorias', CategoriaController::class);
         Route::resource('productos', ProductoController::class);

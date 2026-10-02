@@ -126,7 +126,7 @@
                             <span>Costo de envío</span>
                             <span x-text="'+ ' + money(costoEnvio)"></span>
                         </div>
-                        <div class="flex justify-between text-slate-500"><span>IGV ({{ $config->igv }}%)</span><span x-text="money(igv)"></span></div>
+                        <div class="flex justify-between text-slate-500"><span>IVA ({{ $config->igv }}%)</span><span x-text="money(igv)"></span></div>
                         <div class="flex justify-between text-base font-extrabold text-slate-800"><span>Total</span><span x-text="money(total)"></span></div>
                     </div>
 
@@ -136,7 +136,7 @@
                     </label>
                     <select name="metodo_pago" x-show="pagar" class="form-input-c mt-2 text-sm">
                         <option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option>
-                        <option value="yape">Yape</option><option value="plin">Plin</option><option value="transferencia">Transferencia</option>
+                        <option value="oxxo">OXXO Pay</option><option value="mercadopago">Mercado Pago</option><option value="clip">Clip</option><option value="transferencia">Transferencia / SPEI</option><option value="codi">CoDi</option>
                     </select>
 
                     <button type="submit" :disabled="cart.length===0" class="btn-primary mt-3 w-full disabled:cursor-not-allowed disabled:opacity-50">
@@ -192,7 +192,7 @@
                 get base() { return Math.max(0, this.subtotal - this.descuentoTotal); },
                 get igv() { return this.base * this.igvRate; },
                 get total() { return this.base + this.igv + (this.tipo === 'delivery' ? (parseFloat(this.costoEnvio) || 0) : 0); },
-                money(v) { return '{{ $m }} ' + Number(v).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+                money(v) { return '{{ $m }} ' + Number(v).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
             };
         }
     </script>

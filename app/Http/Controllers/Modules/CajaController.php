@@ -58,7 +58,7 @@ class CajaController extends Controller
             'tipo'        => 'required|in:ingreso,egreso',
             'concepto'    => 'required|string|max:255',
             'monto'       => 'required|numeric|min:0.01',
-            'metodo_pago' => 'nullable|in:efectivo,tarjeta,yape,plin,transferencia',
+            'metodo_pago' => 'nullable|in:efectivo,tarjeta,transferencia,oxxo,mercadopago,clip,codi',
         ]);
 
         $caja->movimientos()->create([

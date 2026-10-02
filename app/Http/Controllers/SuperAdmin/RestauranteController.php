@@ -85,7 +85,7 @@ class RestauranteController extends Controller
             'plan_id'     => 'required|exists:planes,id',
             'monto'       => 'required|numeric|min:0',
             'intervalo'   => 'required|in:mensual,anual',
-            'metodo_pago' => 'required|in:efectivo,tarjeta,yape,plin,transferencia',
+            'metodo_pago' => 'required|in:efectivo,tarjeta,transferencia,oxxo,mercadopago,clip',
         ]);
 
         $plan = Plan::find($data['plan_id']);

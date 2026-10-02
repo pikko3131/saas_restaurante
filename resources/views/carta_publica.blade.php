@@ -9,7 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#fdf8f2] text-slate-700" x-data="carta()">
-    @php $moneda = $restaurante->moneda ?: 'S/'; @endphp
+    @php $moneda = $restaurante->moneda ?: '$'; @endphp
 
     {{-- Confirmación de pedido --}}
     @if(session('pedido_ok'))

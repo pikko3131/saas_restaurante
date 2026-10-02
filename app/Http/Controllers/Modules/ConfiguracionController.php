@@ -30,8 +30,18 @@ class ConfiguracionController extends Controller
             'meta_mensual' => 'required|numeric|min:0',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
             'eliminar_logo' => 'nullable|boolean',
+            'rappi_activo' => 'nullable|boolean',
+            'rappi_store_id' => 'nullable|string|max:100',
+            'rappi_api_key' => 'nullable|string|max:255',
+            'rappi_webhook_secret' => 'nullable|string|max:255',
+            'ubereats_activo' => 'nullable|boolean',
+            'ubereats_store_id' => 'nullable|string|max:100',
+            'ubereats_client_id' => 'nullable|string|max:255',
+            'ubereats_client_secret' => 'nullable|string|max:255',
         ]);
 
+        $data['rappi_activo'] = $request->boolean('rappi_activo');
+        $data['ubereats_activo'] = $request->boolean('ubereats_activo');
         $data['nombre'] = $data['nombre_restaurante'];
         unset($data['nombre_restaurante']);
 

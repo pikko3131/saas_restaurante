@@ -12,13 +12,18 @@ class DeliveryController extends Controller
     public function index(Request $request)
     {
         $estado = $request->query('estado', 'todos');
+        $plataforma = $request->query('plataforma', 'todos');
 
-        $query = Pedido::with(['cliente', 'user'])
+        $query = Pedido::with(['cliente', 'user', 'items'])
             ->where('tipo', 'delivery')
             ->latest();
 
         if ($estado !== 'todos') {
             $query->where('delivery_estado', $estado);
+        }
+
+        if ($plataforma !== 'todos') {
+            $query->where('delivery_plataforma', $plataforma);
         }
 
         $pedidos = $query->paginate(15)->withQueryString();
@@ -29,11 +34,16 @@ class DeliveryController extends Controller
             'pendiente' => Pedido::where('tipo', 'delivery')->where('delivery_estado', 'pendiente')->count(),
             'en_camino' => Pedido::where('tipo', 'delivery')->where('delivery_estado', 'en_camino')->count(),
             'entregado' => Pedido::where('tipo', 'delivery')->where('delivery_estado', 'entregado')->count(),
+            'rappi' => Pedido::where('tipo', 'delivery')->where('delivery_plataforma', 'rappi')->count(),
+            'ubereats' => Pedido::where('tipo', 'delivery')->where('delivery_plataforma', 'ubereats')->count(),
+            'directo' => Pedido::where('tipo', 'delivery')->where(function ($q) {
+                $q->whereNull('delivery_plataforma')->orWhere('delivery_plataforma', 'directo');
+            })->count(),
         ];
 
         $config = Restaurante::actual();
 
-        return view('modules.delivery.index', compact('pedidos', 'estado', 'conteo', 'config'));
+        return view('modules.delivery.index', compact('pedidos', 'estado', 'plataforma', 'conteo', 'config'));
     }
 
     public function cambiarEstado(Request $request, Pedido $pedido)

@@ -77,8 +77,8 @@ class DemoDataSeeder extends Seeder
             ['Ensaladas', 'Ensalada César', 24, 8], ['Pizzas', 'Pizza Margarita', 36, 12],
             ['Pizzas', 'Pizza Americana', 40, 14], ['Mariscos', 'Ceviche Mixto', 42, 16],
             ['Mariscos', 'Chicharrón de Pescado', 38, 14], ['Vegetariano', 'Risotto de Champiñones', 32, 10],
-            ['Sándwiches', 'Sándwich de Lomo', 22, 8], ['Desayunos', 'Desayuno Americano', 26, 9],
-            ['Tragos', 'Pisco Sour', 20, 6], ['Cafés', 'Capuccino', 10, 2.5],
+            ['Sándwiches', 'Sándwich de Lomo', 120, 45], ['Desayunos', 'Desayuno Mexicano', 130, 45],
+            ['Tragos', 'Margarita Clásica', 110, 35], ['Cafés', 'Capuccino', 55, 18],
         ];
         foreach ($items as $p) {
             $cat = Categoria::where('nombre', $p[0])->first();
@@ -141,13 +141,13 @@ class DemoDataSeeder extends Seeder
 
     private function reservas(): void
     {
-        $nombres = ['Familia Quispe', 'Empresa Norte', 'Sra. Pacheco', 'Grupo Universitario', 'Sr. Linares',
-            'Cumpleaños Ana', 'Reunión Ventas', 'Familia Rojas', 'Pareja Aniversario', 'Delegación Cusco'];
+        $nombres = ['Familia Hernández', 'Empresa Norte', 'Sra. Pacheco', 'Grupo Universitario', 'Sr. Linares',
+            'Cumpleaños Ana', 'Reunión Ventas', 'Familia Rojas', 'Pareja Aniversario', 'Delegación Monterrey'];
         foreach ($nombres as $i => $n) {
             Reserva::firstOrCreate(
                 ['nombre_cliente' => $n, 'notas' => 'demo-seed'],
                 [
-                    'telefono' => '9'.str_pad((string) rand(0, 99999999), 8, '0', STR_PAD_LEFT),
+                    'telefono' => '55'.str_pad((string) rand(0, 99999999), 8, '0', STR_PAD_LEFT),
                     'mesa_id' => Mesa::inRandomOrder()->first()?->id,
                     'fecha' => now()->addDays(rand(-3, 10))->toDateString(),
                     'hora' => sprintf('%02d:%02d:00', rand(12, 21), [0, 30][array_rand([0, 30])]),
@@ -177,7 +177,7 @@ class DemoDataSeeder extends Seeder
                 'user_id' => optional(\App\Models\User::where('role', 'admin')->first())->id,
                 'tipo' => ['mesa', 'mesa', 'llevar', 'delivery'][array_rand(['mesa', 'mesa', 'llevar', 'delivery'])],
                 'estado' => $estado,
-                'metodo_pago' => $estado === 'pagado' ? ['efectivo', 'tarjeta', 'yape', 'plin'][array_rand(['efectivo', 'tarjeta', 'yape', 'plin'])] : null,
+                'metodo_pago' => $estado === 'pagado' ? ['efectivo', 'tarjeta', 'transferencia', 'oxxo', 'mercadopago', 'clip'][array_rand(['efectivo', 'tarjeta', 'transferencia', 'oxxo', 'mercadopago', 'clip'])] : null,
                 'created_at' => $fecha, 'updated_at' => $fecha,
                 'pagado_at' => $estado === 'pagado' ? $fecha : null,
             ]);

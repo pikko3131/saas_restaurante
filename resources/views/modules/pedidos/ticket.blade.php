@@ -175,7 +175,7 @@
                 <img src="{{ asset('storage/'.$config->logo) }}" alt="Logo" class="logo-img">
             @endif
             <p class="bold lg">{{ $config->nombre }}</p>
-            @if($config->ruc)<p class="sm">RUC/NIT: {{ $config->ruc }}</p>@endif
+            @if($config->ruc)<p class="sm">RFC: {{ $config->ruc }}</p>@endif
             @if($config->direccion)<p class="xs">{{ $config->direccion }}</p>@endif
             @if($config->telefono)<p class="xs">Tel: {{ $config->telefono }}</p>@endif
         </div>
@@ -285,7 +285,7 @@
         @endif
         @if($pedido->impuesto > 0)
             <div class="row sm">
-                <span>Impuesto / IGV ({{ $config->igv }}%):</span>
+                <span>Impuesto / IVA ({{ $config->igv }}%):</span>
                 <span>{{ $m }} {{ number_format($pedido->impuesto, 2) }}</span>
             </div>
         @endif

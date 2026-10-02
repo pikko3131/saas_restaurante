@@ -24,7 +24,7 @@ class SuscripcionController extends Controller
     {
         $data = $request->validate([
             'plan_id' => 'required|exists:planes,id',
-            'metodo_pago' => 'required|in:tarjeta,yape,plin,transferencia',
+            'metodo_pago' => 'required|in:tarjeta,transferencia,oxxo,mercadopago,clip',
         ]);
 
         $restaurante = Restaurante::actual();

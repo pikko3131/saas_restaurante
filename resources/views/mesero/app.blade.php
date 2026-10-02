@@ -101,7 +101,7 @@
                             <li><span class="font-semibold" x-text="it.cantidad+'×'"></span> <span x-text="it.nombre"></span></li>
                         </template>
                     </ul>
-                    <p class="mt-2 text-right text-sm font-bold" x-text="'S/ '+Number(p.total||0).toFixed(2)"></p>
+                    <p class="mt-2 text-right text-sm font-bold" x-text="'$ '+Number(p.total||0).toFixed(2)"></p>
                     <p x-show="p.estado!=='servido' && !p.entregado" class="mt-2 text-xs text-slate-400">Esperando a cocina…</p>
                     <button x-show="p.puede_llevar" @click="llevar(p)"
                             class="mt-3 w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-bold text-white">

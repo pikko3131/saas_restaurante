@@ -36,7 +36,7 @@ class PosController extends Controller
             'mesa_id' => 'nullable|exists:mesas,id',
             'cliente_id' => 'nullable|exists:clientes,id',
             'tipo' => 'required|in:mesa,llevar,delivery',
-            'metodo_pago' => 'nullable|in:efectivo,tarjeta,yape,plin,transferencia',
+            'metodo_pago' => 'nullable|in:efectivo,tarjeta,transferencia,oxxo,mercadopago,clip,codi',
             'pagar' => 'nullable|boolean',
             'descuento' => 'nullable|numeric|min:0',
             'promocion_id' => 'nullable|exists:promociones,id',

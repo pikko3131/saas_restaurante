@@ -19,6 +19,7 @@ class Pedido extends Model
         'entregado_at', 'promocion_id', 'puntos_usados', 'puntos_ganados',
         'delivery_direccion', 'delivery_telefono', 'delivery_referencia', 'delivery_costo_envio',
         'delivery_repartidor', 'delivery_estado',
+        'delivery_plataforma', 'delivery_externo_id', 'delivery_datos_json', 'delivery_tracking_url',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class Pedido extends Model
         'impuesto' => 'decimal:2',
         'total' => 'decimal:2',
         'delivery_costo_envio' => 'decimal:2',
+        'delivery_datos_json' => 'array',
         'pagado_at' => 'datetime',
         'entregado_at' => 'datetime',
     ];
