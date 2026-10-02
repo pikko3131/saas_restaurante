@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Concerns\BelongsToTenant;
 
 class Pedido extends Model
 {
-    use HasFactory, BelongsToTenant;
+    use HasFactory, BelongsToTenant, SoftDeletes;
 
     protected $table = 'pedidos';
 
@@ -16,6 +17,8 @@ class Pedido extends Model
         'restaurante_id', 'codigo', 'mesa_id', 'cliente_id', 'user_id', 'tipo', 'estado',
         'subtotal', 'descuento', 'impuesto', 'total', 'metodo_pago', 'notas', 'pagado_at',
         'entregado_at', 'promocion_id', 'puntos_usados', 'puntos_ganados',
+        'delivery_direccion', 'delivery_telefono', 'delivery_referencia', 'delivery_costo_envio',
+        'delivery_repartidor', 'delivery_estado',
     ];
 
     protected $casts = [
@@ -23,6 +26,7 @@ class Pedido extends Model
         'descuento' => 'decimal:2',
         'impuesto' => 'decimal:2',
         'total' => 'decimal:2',
+        'delivery_costo_envio' => 'decimal:2',
         'pagado_at' => 'datetime',
         'entregado_at' => 'datetime',
     ];

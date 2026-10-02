@@ -57,6 +57,20 @@
                         </select>
                     </div>
 
+                    {{-- Campos exclusivos para Delivery --}}
+                    <div x-show="tipo==='delivery'" class="mt-2 space-y-2 rounded-xl bg-orange-50/70 p-3 border border-orange-200/70" style="display:none">
+                        <p class="text-xs font-bold text-orange-800">🛵 Datos de Entrega a Domicilio</p>
+                        <input type="text" name="delivery_direccion" placeholder="Dirección de entrega *" class="form-input-c text-xs" :required="tipo==='delivery'">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" name="delivery_telefono" placeholder="Teléfono" class="form-input-c text-xs">
+                            <input type="number" step="0.50" min="0" name="delivery_costo_envio" x-model.number="costoEnvio" placeholder="Costo envío" class="form-input-c text-xs">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" name="delivery_referencia" placeholder="Referencia / Casa" class="form-input-c text-xs">
+                            <input type="text" name="delivery_repartidor" placeholder="Repartidor" class="form-input-c text-xs">
+                        </div>
+                    </div>
+
                     <select name="cliente_id" x-model="clienteId" class="form-input-c mt-2 text-sm">
                         <option value="">Cliente genérico</option>
                         @foreach ($clientes as $cl)<option value="{{ $cl->id }}">{{ $cl->nombre }}</option>@endforeach
@@ -108,6 +122,10 @@
                         </div>
                         <div x-show="descPromo > 0" class="flex justify-between text-emerald-600" style="display:none"><span>Promoción</span><span x-text="'- ' + money(descPromo)"></span></div>
                         <div x-show="descPuntos > 0" class="flex justify-between text-emerald-600" style="display:none"><span>Puntos canjeados</span><span x-text="'- ' + money(descPuntos)"></span></div>
+                        <div x-show="tipo === 'delivery' && costoEnvio > 0" class="flex justify-between text-slate-600" style="display:none">
+                            <span>Costo de envío</span>
+                            <span x-text="'+ ' + money(costoEnvio)"></span>
+                        </div>
                         <div class="flex justify-between text-slate-500"><span>IGV ({{ $config->igv }}%)</span><span x-text="money(igv)"></span></div>
                         <div class="flex justify-between text-base font-extrabold text-slate-800"><span>Total</span><span x-text="money(total)"></span></div>
                     </div>
@@ -135,7 +153,7 @@
             return {
                 products: @json($prods),
                 cart: [], search: '', cat: null, tipo: 'mesa', descuento: 0, pagar: false,
-                clienteId: '', promoId: '', codigoPromo: '', usarPuntos: 0,
+                clienteId: '', promoId: '', codigoPromo: '', usarPuntos: 0, costoEnvio: 0,
                 promos: @json($promosJson),
                 clientesPuntos: @json($clientesPuntosJson),
                 valorPunto: {{ \App\Models\Cliente::VALOR_PUNTO }},
@@ -173,7 +191,7 @@
                 get subtotal() { return this.cart.reduce((s, i) => s + i.precio * i.cantidad, 0); },
                 get base() { return Math.max(0, this.subtotal - this.descuentoTotal); },
                 get igv() { return this.base * this.igvRate; },
-                get total() { return this.base + this.igv; },
+                get total() { return this.base + this.igv + (this.tipo === 'delivery' ? (parseFloat(this.costoEnvio) || 0) : 0); },
                 money(v) { return '{{ $m }} ' + Number(v).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
             };
         }

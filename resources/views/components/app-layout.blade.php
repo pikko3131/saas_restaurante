@@ -13,7 +13,8 @@
             ['pedidos',   'Pedidos',  'route' => 'pedidos.index',  'pattern' => 'pedidos*',  'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'],
             ['cocina',    'Cocina (KDS)', 'route' => 'cocina.index',   'pattern' => 'cocina*',   'icon' => 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z'],
             ['mesero',    'Mi salón',     'route' => 'mesero.index',   'pattern' => 'mesero*',   'icon' => 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z'],
-            ['caja',      'Caja',     'route' => 'caja.index',     'pattern' => 'caja*',     'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 12h12l-3-3m0 6l3-3'],
+            ['delivery',  'Delivery',     'route' => 'delivery.index', 'pattern' => 'delivery*', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
+            ['caja',      'Caja',         'route' => 'caja.index',     'pattern' => 'caja*',     'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 12h12l-3-3m0 6l3-3'],
         ]],
         ['Carta', [
             ['categorias', 'Categorías', 'route' => 'categorias.index', 'pattern' => 'categorias*', 'icon' => 'M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z'],
@@ -61,7 +62,11 @@
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
            class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col bg-gradient-to-b from-brand-800 to-brand-950 transition-transform duration-200 lg:static lg:translate-x-0">
         <div class="flex items-center gap-3 px-6 py-5">
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-xl backdrop-blur">🍽️</div>
+            @if ($config?->logo)
+                <img src="{{ asset('storage/' . $config->logo) }}" alt="Logo" class="h-11 w-11 rounded-2xl object-cover bg-white/10 ring-1 ring-white/20">
+            @else
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-xl backdrop-blur">🍽️</div>
+            @endif
             <div class="min-w-0">
                 <p class="truncate text-sm font-extrabold text-white">{{ $config->nombre_restaurante }}</p>
                 <p class="text-[11px] text-orange-200/70">Panel de administración</p>

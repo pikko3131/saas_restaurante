@@ -10,6 +10,7 @@ use App\Http\Controllers\Modules\ClienteController;
 use App\Http\Controllers\Modules\CajaController;
 use App\Http\Controllers\Modules\CocinaController;
 use App\Http\Controllers\Modules\ConfiguracionController;
+use App\Http\Controllers\Modules\DeliveryController;
 use App\Http\Controllers\Modules\InsumoController;
 use App\Http\Controllers\Modules\KardexController;
 use App\Http\Controllers\Modules\MesaController;
@@ -77,6 +78,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::patch('pedidos/{pedido}/estado', [PedidoController::class, 'cambiarEstado'])->name('pedidos.estado');
         Route::get('pedidos/{pedido}/ticket', [PedidoController::class, 'ticket'])->name('pedidos.ticket');
         Route::resource('pedidos', PedidoController::class)->only(['index', 'show', 'destroy']);
+        Route::get('/delivery', [DeliveryController::class, 'index'])->name('delivery.index');
+        Route::patch('/delivery/{pedido}/estado', [DeliveryController::class, 'cambiarEstado'])->name('delivery.estado');
 
         Route::resource('categorias', CategoriaController::class);
         Route::resource('productos', ProductoController::class);
@@ -105,6 +108,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
 
         Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
         Route::get('/reportes/exportar', [ReporteController::class, 'exportarRentabilidad'])->name('reportes.exportar');
+        Route::get('/reportes/exportar-ventas', [ReporteController::class, 'exportarVentas'])->name('reportes.exportar_ventas');
         Route::get('/reportes/imprimir', [ReporteController::class, 'imprimir'])->name('reportes.imprimir');
 
         // Solo administrador del restaurante

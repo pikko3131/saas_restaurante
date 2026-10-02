@@ -42,6 +42,11 @@ class PosController extends Controller
             'promocion_id' => 'nullable|exists:promociones,id',
             'codigo_promo' => 'nullable|string|max:40',
             'usar_puntos' => 'nullable|integer|min:0',
+            'delivery_direccion' => 'nullable|string|max:255',
+            'delivery_telefono' => 'nullable|string|max:30',
+            'delivery_referencia' => 'nullable|string|max:255',
+            'delivery_costo_envio' => 'nullable|numeric|min:0',
+            'delivery_repartidor' => 'nullable|string|max:100',
             'items' => 'required|array|min:1',
             'items.*.id' => 'required|exists:productos,id',
             'items.*.cantidad' => 'required|integer|min:1',
@@ -86,6 +91,7 @@ class PosController extends Controller
             $base = max(0, $subtotal - $descuento);
             $impuesto = round($base * ((float) $config->igv / 100), 2);
             $pagado = (bool) ($data['pagar'] ?? false);
+            $costoEnvio = $data['tipo'] === 'delivery' ? (float) ($data['delivery_costo_envio'] ?? 0) : 0;
 
             $pedido = Pedido::create([
                 'codigo' => Pedido::generarCodigo(),
@@ -101,7 +107,13 @@ class PosController extends Controller
                 'pagado_at' => $pagado ? now() : null,
                 'subtotal' => $subtotal,
                 'impuesto' => $impuesto,
-                'total' => $base + $impuesto,
+                'total' => $base + $impuesto + $costoEnvio,
+                'delivery_direccion' => $data['delivery_direccion'] ?? null,
+                'delivery_telefono' => $data['delivery_telefono'] ?? null,
+                'delivery_referencia' => $data['delivery_referencia'] ?? null,
+                'delivery_costo_envio' => $costoEnvio,
+                'delivery_repartidor' => $data['delivery_repartidor'] ?? null,
+                'delivery_estado' => $data['tipo'] === 'delivery' ? 'pendiente' : null,
             ]);
 
             foreach ($detalle as [$prod, $cant, $sub]) {
