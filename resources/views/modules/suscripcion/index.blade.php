@@ -33,7 +33,7 @@
                     @endif
                     <h3 class="mt-2 text-lg font-extrabold text-slate-800">{{ $plan->nombre }}</h3>
                     <p class="text-sm text-slate-500">{{ $plan->descripcion }}</p>
-                    <p class="mt-3 text-3xl font-extrabold text-brand-600">S/ {{ number_format($plan->precio, 0) }}<span class="text-sm font-medium text-slate-400">/{{ $plan->intervalo === 'anual' ? 'año' : 'mes' }}</span></p>
+                    <p class="mt-3 text-3xl font-extrabold text-brand-600">$ {{ number_format($plan->precio, 0) }}<span class="text-sm font-medium text-slate-400">/{{ $plan->intervalo === 'anual' ? 'año' : 'mes' }}</span></p>
                     <ul class="mt-4 space-y-1.5 text-sm text-slate-600">
                         <li>🪑 {{ $plan->limiteTexto('mesas') }} mesas</li>
                         <li>🍽️ {{ $plan->limiteTexto('productos') }} productos</li>
@@ -53,7 +53,7 @@
         <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" style="display:none">
             <div @click.outside="open=false" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
                 <h3 class="text-lg font-extrabold text-slate-800">Confirmar suscripción</h3>
-                <p class="mt-1 text-sm text-slate-500">Plan <strong x-text="plan.nombre"></strong> — S/ <span x-text="plan.precio"></span>/<span x-text="plan.intervalo"></span></p>
+                <p class="mt-1 text-sm text-slate-500">Plan <strong x-text="plan.nombre"></strong> — $ <span x-text="plan.precio"></span>/<span x-text="plan.intervalo"></span> MXN</p>
 
                 <form method="POST" action="{{ route('suscripcion.pagar') }}" class="mt-5 space-y-4">
                     @csrf
@@ -62,9 +62,10 @@
                         <label class="mb-1.5 block text-sm font-semibold text-slate-700">Método de pago</label>
                         <select name="metodo_pago" x-model="metodo" class="form-input-c">
                             <option value="tarjeta">Tarjeta de crédito/débito</option>
-                            <option value="yape">Yape</option>
-                            <option value="plin">Plin</option>
-                            <option value="transferencia">Transferencia bancaria</option>
+                            <option value="oxxo">OXXO Pay</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                            <option value="clip">Clip</option>
+                            <option value="transferencia">Transferencia bancaria / SPEI</option>
                         </select>
                     </div>
                     <div class="rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-700">
@@ -97,7 +98,7 @@
                             <td class="py-2.5 text-slate-500">{{ $s->periodo_inicio->format('d/m/Y') }} → {{ $s->periodo_fin->format('d/m/Y') }}</td>
                             <td class="py-2.5 capitalize text-slate-600">{{ $s->metodo_pago }}</td>
                             <td class="py-2.5 font-mono text-xs text-slate-500">{{ $s->referencia }}</td>
-                            <td class="py-2.5 text-right font-bold text-slate-700">S/ {{ number_format($s->monto, 2) }}</td>
+                            <td class="py-2.5 text-right font-bold text-slate-700">$ {{ number_format($s->monto, 2) }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="6" class="py-6 text-center text-slate-400">Aún no tienes pagos registrados.</td></tr>

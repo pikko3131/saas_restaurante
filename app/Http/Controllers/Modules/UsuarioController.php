@@ -29,9 +29,13 @@ class UsuarioController extends Controller
         if ($rest && $rest->limiteAlcanzado('usuarios', User::count())) {
             return back()->withInput()->with('error', 'Alcanzaste el límite de usuarios de tu plan. Mejora tu plan en Suscripción para agregar más.');
         }
+        $restId = auth()->user()->restaurante_id;
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')],
+            'email' => [
+                'required', 'email', 'max:255',
+                Rule::unique('users')->where('restaurante_id', $restId)->whereNull('deleted_at'),
+            ],
             'role' => 'required|in:admin,cajero,mesero,cocina',
             'telefono' => 'nullable|string|max:30',
             'password' => ['required', 'confirmed', Password::defaults()],
@@ -49,9 +53,13 @@ class UsuarioController extends Controller
 
     public function update(Request $request, User $usuario)
     {
+        $restId = auth()->user()->restaurante_id;
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($usuario->id)],
+            'email' => [
+                'required', 'email', 'max:255',
+                Rule::unique('users')->where('restaurante_id', $restId)->whereNull('deleted_at')->ignore($usuario->id),
+            ],
             'role' => 'required|in:admin,cajero,mesero,cocina',
             'telefono' => 'nullable|string|max:30',
             'password' => ['nullable', 'confirmed', Password::defaults()],

@@ -31,7 +31,7 @@
                 <div class="mt-10 space-y-5">
                     @php
                         $items = [
-                            ['🛒','Punto de Venta','Pedidos, IGV y cobros en segundos'],
+                            ['🛒','Punto de Venta','Pedidos, IVA y cobros en segundos'],
                             ['🪑','Mesas y Reservas','Controla salones y reservas en tiempo real'],
                             ['📊','Reportes Avanzados','Métricas y estadísticas en tiempo real'],
                             ['📱','Acceso Multiplataforma','Disponible en cualquier dispositivo'],

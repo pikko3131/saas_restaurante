@@ -12,7 +12,7 @@
                     <span class="badge {{ $plan->activo ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">{{ $plan->activo ? 'Activo' : 'Inactivo' }}</span>
                 </div>
                 <p class="text-sm text-slate-500">{{ $plan->descripcion }}</p>
-                <p class="mt-3 text-3xl font-extrabold text-brand-600">S/ {{ number_format($plan->precio, 0) }}<span class="text-sm font-medium text-slate-400">/{{ $plan->intervalo === 'anual' ? 'año' : 'mes' }}</span></p>
+                <p class="mt-3 text-3xl font-extrabold text-brand-600">$ {{ number_format($plan->precio, 0) }}<span class="text-sm font-medium text-slate-400">/{{ $plan->intervalo === 'anual' ? 'año' : 'mes' }}</span></p>
                 <ul class="mt-4 space-y-1.5 text-sm text-slate-600">
                     <li>🪑 {{ $plan->limiteTexto('mesas') }} mesas</li>
                     <li>🍽️ {{ $plan->limiteTexto('productos') }} productos</li>

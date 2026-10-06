@@ -30,7 +30,7 @@
                         <label class="mb-1.5 block text-sm font-semibold text-slate-700">Plan</label>
                         <select name="plan_id" class="form-input-c">
                             <option value="">— Sin plan —</option>
-                            @foreach ($planes as $p)<option value="{{ $p->id }}" @selected(old('plan_id', $restaurante->plan_id)==$p->id)>{{ $p->nombre }} (S/ {{ number_format($p->precio,0) }})</option>@endforeach
+                            @foreach ($planes as $p)<option value="{{ $p->id }}" @selected(old('plan_id', $restaurante->plan_id)==$p->id)>{{ $p->nombre }} ($ {{ number_format($p->precio,0) }})</option>@endforeach
                         </select>
                     </div>
                     <div>
@@ -83,13 +83,13 @@
                 <form x-show="tab==='pago'" method="POST" action="{{ route('superadmin.restaurantes.pago', $restaurante) }}" class="space-y-2.5">
                     @csrf
                     <select name="plan_id" class="form-input-c text-sm">
-                        @foreach ($planes as $p)<option value="{{ $p->id }}" @selected($restaurante->plan_id==$p->id)>{{ $p->nombre }} (S/ {{ number_format($p->precio,0) }})</option>@endforeach
+                        @foreach ($planes as $p)<option value="{{ $p->id }}" @selected($restaurante->plan_id==$p->id)>{{ $p->nombre }} ($ {{ number_format($p->precio,0) }})</option>@endforeach
                     </select>
                     <div class="grid grid-cols-2 gap-2">
                         <input type="number" step="0.01" min="0" name="monto" value="{{ $restaurante->plan?->precio ?? 0 }}" class="form-input-c text-sm" placeholder="Monto" required>
                         <select name="intervalo" class="form-input-c text-sm"><option value="mensual">Mensual</option><option value="anual">Anual</option></select>
                     </div>
-                    <select name="metodo_pago" class="form-input-c text-sm"><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option><option value="efectivo">Efectivo</option><option value="yape">Yape</option><option value="plin">Plin</option></select>
+                    <select name="metodo_pago" class="form-input-c text-sm"><option value="transferencia">Transferencia / SPEI</option><option value="tarjeta">Tarjeta</option><option value="efectivo">Efectivo</option><option value="oxxo">OXXO Pay</option><option value="mercadopago">Mercado Pago</option><option value="clip">Clip</option></select>
                     <button class="btn-primary w-full text-sm">Registrar pago y activar</button>
                 </form>
 
@@ -121,7 +121,7 @@
                                 <p class="font-semibold text-slate-700">{{ $s->nombre_plan }}</p>
                                 <p class="text-xs text-slate-400">{{ $s->periodo_inicio->format('d/m/Y') }} → {{ $s->periodo_fin->format('d/m/Y') }}</p>
                             </div>
-                            <span class="font-bold text-slate-700">S/ {{ number_format($s->monto,2) }}</span>
+                            <span class="font-bold text-slate-700">$ {{ number_format($s->monto,2) }}</span>
                         </div>
                     @empty
                         <p class="text-slate-400">Sin pagos registrados.</p>

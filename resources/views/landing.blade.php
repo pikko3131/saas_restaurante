@@ -95,7 +95,7 @@
             <div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @php
                     $features = [
-                        ['🛒','Punto de Venta','Toma pedidos en segundos con cálculo automático de IGV, descuentos y múltiples medios de pago.'],
+                        ['🛒','Punto de Venta','Toma pedidos en segundos con cálculo automático de IVA, descuentos y múltiples medios de pago.'],
                         ['🪑','Gestión de Mesas','Visualiza el estado de tus salones en tiempo real: libres, ocupadas, reservadas y por cobrar.'],
                         ['📅','Reservas','Organiza las reservas de tus clientes y asigna mesas sin sobreventa.'],
                         ['📖','Carta Digital','Administra categorías, productos, precios, costos y disponibilidad desde un solo lugar.'],
@@ -155,7 +155,7 @@
                         <h3 class="text-lg font-extrabold text-slate-800">{{ $plan->nombre }}</h3>
                         <p class="mt-1 text-sm text-slate-500">{{ $plan->descripcion }}</p>
                         <div class="mt-4 flex items-end gap-1">
-                            <span class="text-4xl font-extrabold text-slate-900">S/ {{ number_format($plan->precio, 0) }}</span>
+                            <span class="text-4xl font-extrabold text-slate-900">$ {{ number_format($plan->precio, 0) }}</span>
                             <span class="mb-1 text-sm text-slate-400">/{{ $plan->intervalo === 'anual' ? 'año' : 'mes' }}</span>
                         </div>
                         <ul class="mt-6 space-y-3 text-sm">

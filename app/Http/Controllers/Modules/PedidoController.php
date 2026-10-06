@@ -35,7 +35,7 @@ class PedidoController extends Controller
     {
         $data = $request->validate([
             'estado' => 'required|in:pendiente,preparando,servido,pagado,cancelado',
-            'metodo_pago' => 'nullable|in:efectivo,tarjeta,yape,plin,transferencia',
+            'metodo_pago' => 'nullable|in:efectivo,tarjeta,transferencia,oxxo,mercadopago,clip,codi',
         ]);
 
         $previo = $pedido->estado;

@@ -15,7 +15,7 @@
                     <input name="nombre" value="{{ old('nombre', $plan->nombre) }}" class="form-input-c" required>
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-semibold text-slate-700">Precio (S/) *</label>
+                    <label class="mb-1.5 block text-sm font-semibold text-slate-700">Precio ($ MXN) *</label>
                     <input type="number" step="0.01" name="precio" value="{{ old('precio', $plan->precio) }}" class="form-input-c" required>
                 </div>
                 <div>

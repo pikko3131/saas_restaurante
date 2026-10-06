@@ -1,5 +1,5 @@
 <x-app-layout title="Arqueo de caja">
-    @php $m = fn($v) => 'S/ '.number_format((float)$v, 2); @endphp
+    @php $m = fn($v) => '$ '.number_format((float)$v, 2); @endphp
 
     <x-page-header title="Arqueo de caja" subtitle="Cierre del {{ $caja->cerrada_at?->format('d/m/Y H:i') }}">
         <a href="{{ route('caja.index') }}" class="btn-secondary">← Volver</a>
@@ -38,7 +38,7 @@
         {{-- Ventas por método --}}
         <div class="card">
             <h3 class="mb-3 font-bold text-slate-800">Ventas por método de pago</h3>
-            @php $metodos = ['efectivo'=>'Efectivo','tarjeta'=>'Tarjeta','yape'=>'Yape','plin'=>'Plin','transferencia'=>'Transferencia']; @endphp
+            @php $metodos = ['efectivo'=>'Efectivo','tarjeta'=>'Tarjeta','transferencia'=>'Transferencia / SPEI','oxxo'=>'OXXO Pay','mercadopago'=>'Mercado Pago','clip'=>'Clip','codi'=>'CoDi']; @endphp
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 @foreach($metodos as $k=>$label)
                     <div class="rounded-xl bg-slate-50 p-3"><p class="text-xs text-slate-400">{{ $label }}</p><p class="font-bold text-slate-800">{{ $m($resumen['ventas'][$k] ?? 0) }}</p></div>

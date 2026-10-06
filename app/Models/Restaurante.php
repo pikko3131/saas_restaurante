@@ -16,6 +16,8 @@ class Restaurante extends Model
         'nombre', 'slug', 'email', 'telefono', 'ruc', 'direccion', 'logo',
         'moneda', 'igv', 'meta_mensual', 'plan_id', 'estado',
         'trial_ends_at', 'subscription_ends_at', 'activo',
+        'rappi_activo', 'rappi_store_id', 'rappi_api_key', 'rappi_webhook_secret',
+        'ubereats_activo', 'ubereats_store_id', 'ubereats_client_id', 'ubereats_client_secret',
     ];
 
     protected $casts = [
@@ -24,6 +26,8 @@ class Restaurante extends Model
         'trial_ends_at' => 'datetime',
         'subscription_ends_at' => 'datetime',
         'activo' => 'boolean',
+        'rappi_activo' => 'boolean',
+        'ubereats_activo' => 'boolean',
     ];
 
     /** Tenant activo actual (resuelto por el middleware o el usuario logueado). */

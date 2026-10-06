@@ -30,11 +30,11 @@
     {{-- Tarjetas financieras --}}
     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="card flex items-center justify-between">
-            <div><p class="text-xs font-semibold uppercase text-slate-400">MRR estimado</p><p class="mt-1 text-2xl font-extrabold text-brand-600">S/ {{ number_format($mrr, 2) }}</p><p class="text-xs text-slate-400">Ingreso recurrente mensual</p></div>
+            <div><p class="text-xs font-semibold uppercase text-slate-400">MRR estimado</p><p class="mt-1 text-2xl font-extrabold text-brand-600">$ {{ number_format($mrr, 2) }}</p><p class="text-xs text-slate-400">Ingreso recurrente mensual</p></div>
             <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></span>
         </div>
         <div class="card flex items-center justify-between">
-            <div><p class="text-xs font-semibold uppercase text-slate-400">Ingreso histórico</p><p class="mt-1 text-2xl font-extrabold text-slate-800">S/ {{ number_format($ingresoTotal, 2) }}</p><p class="text-xs text-slate-400">Suscripciones pagadas</p></div>
+            <div><p class="text-xs font-semibold uppercase text-slate-400">Ingreso histórico</p><p class="mt-1 text-2xl font-extrabold text-slate-800">$ {{ number_format($ingresoTotal, 2) }}</p><p class="text-xs text-slate-400">Suscripciones pagadas</p></div>
             <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 10v-1m0-8a9 9 0 110 18 9 9 0 010-18z"/></svg></span>
         </div>
         <div class="card flex items-center justify-between">
@@ -65,7 +65,7 @@
             <div class="space-y-3">
                 @foreach ($porPlan as $p)
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-slate-600">{{ $p->nombre }} <span class="text-xs text-slate-400">S/ {{ number_format($p->precio,0) }}</span></span>
+                        <span class="text-sm font-semibold text-slate-600">{{ $p->nombre }} <span class="text-xs text-slate-400">$ {{ number_format($p->precio,0) }}</span></span>
                         <span class="badge bg-brand-50 text-brand-600">{{ $p->restaurantes_count }}</span>
                     </div>
                 @endforeach
@@ -132,12 +132,12 @@
                 chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: 'inherit' },
                 series: [{ name: 'Ingresos', data: @json($ingresosData) }],
                 xaxis: { categories: @json($mesLabels), labels: { style: { colors: '#94a3b8' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-                yaxis: { labels: { style: { colors: '#94a3b8' }, formatter: (v) => 'S/ ' + Math.round(v) } },
+                yaxis: { labels: { style: { colors: '#94a3b8' }, formatter: (v) => '$ ' + Math.round(v) } },
                 colors: [ambar],
                 plotOptions: { bar: { borderRadius: 6, columnWidth: '55%' } },
                 dataLabels: { enabled: false },
                 grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-                tooltip: { y: { formatter: (v) => 'S/ ' + Number(v).toLocaleString('es-PE', {minimumFractionDigits: 2}) } },
+                tooltip: { y: { formatter: (v) => '$ ' + Number(v).toLocaleString('es-MX', {minimumFractionDigits: 2}) } },
             }).render();
         });
     </script>

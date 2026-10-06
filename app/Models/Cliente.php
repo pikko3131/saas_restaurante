@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Concerns\BelongsToTenant;
 
 class Cliente extends Model
 {
-    use HasFactory, BelongsToTenant;
+    use HasFactory, BelongsToTenant, SoftDeletes;
 
-    /** Reglas de fidelización. */
-    public const SOLES_POR_PUNTO = 10;   // 1 punto por cada S/ 10 de consumo
-    public const VALOR_PUNTO = 0.10;     // cada punto vale S/ 0.10 al canjear
+    /** Reglas de fidelización (México: Pesos MXN). */
+    public const PESOS_POR_PUNTO = 10;   // 1 punto por cada $ 10 MXN de consumo
+    public const SOLES_POR_PUNTO = 10;   // Alias de compatibilidad
+    public const VALOR_PUNTO = 0.10;     // Cada punto vale $ 0.10 MXN al canjear
 
     protected $table = 'clientes';
 
@@ -33,7 +35,7 @@ class Cliente extends Model
     /** Acredita puntos por el monto consumido y registra el movimiento. */
     public function acreditarPuntos(float $monto, ?Pedido $pedido = null): int
     {
-        $ganados = (int) floor($monto / self::SOLES_POR_PUNTO);
+        $ganados = (int) floor($monto / self::PESOS_POR_PUNTO);
         if ($ganados <= 0) {
             return 0;
         }

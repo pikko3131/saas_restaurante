@@ -31,7 +31,7 @@
             <div class="mt-4 ml-auto max-w-xs space-y-1 text-sm">
                 <div class="flex justify-between text-slate-500"><span>Subtotal</span><span>{{ $m }} {{ number_format($pedido->subtotal,2) }}</span></div>
                 <div class="flex justify-between text-slate-500"><span>Descuento</span><span>- {{ $m }} {{ number_format($pedido->descuento,2) }}</span></div>
-                <div class="flex justify-between text-slate-500"><span>IGV</span><span>{{ $m }} {{ number_format($pedido->impuesto,2) }}</span></div>
+                <div class="flex justify-between text-slate-500"><span>IVA</span><span>{{ $m }} {{ number_format($pedido->impuesto,2) }}</span></div>
                 <div class="flex justify-between border-t border-slate-100 pt-1 text-base font-extrabold text-slate-800"><span>Total</span><span>{{ $m }} {{ number_format($pedido->total,2) }}</span></div>
             </div>
         </div>
@@ -62,9 +62,11 @@
                     <select name="metodo_pago" class="form-input-c">
                         <option value="efectivo">Efectivo</option>
                         <option value="tarjeta">Tarjeta</option>
-                        <option value="yape">Yape</option>
-                        <option value="plin">Plin</option>
-                        <option value="transferencia">Transferencia</option>
+                        <option value="oxxo">OXXO Pay</option>
+                        <option value="mercadopago">Mercado Pago</option>
+                        <option value="clip">Clip</option>
+                        <option value="transferencia">Transferencia / SPEI</option>
+                        <option value="codi">CoDi</option>
                     </select>
                     <button class="btn-primary w-full">Actualizar</button>
                 </form>

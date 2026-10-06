@@ -7,7 +7,7 @@
     @if ($planSeleccionado)
         <div class="mb-5 flex items-center gap-3 rounded-xl bg-brand-50 px-4 py-3 text-sm">
             <span class="text-brand-600">●</span>
-            <span class="text-slate-600">Plan seleccionado: <strong class="text-brand-700">{{ $planSeleccionado->nombre }}</strong> — S/ {{ number_format($planSeleccionado->precio, 0) }}/{{ $planSeleccionado->intervalo === 'anual' ? 'año' : 'mes' }}</span>
+            <span class="text-slate-600">Plan seleccionado: <strong class="text-brand-700">{{ $planSeleccionado->nombre }}</strong> — $ {{ number_format($planSeleccionado->precio, 0) }}/{{ $planSeleccionado->intervalo === 'anual' ? 'año' : 'mes' }}</span>
         </div>
     @endif
 
