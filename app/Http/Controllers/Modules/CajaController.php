@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Modules;
 use App\Http\Controllers\Controller;
 use App\Models\Caja;
 use App\Models\CajaMovimiento;
+use App\Models\Mesa;
 use Illuminate\Http\Request;
 
 class CajaController extends Controller
@@ -13,16 +14,18 @@ class CajaController extends Controller
     {
         $caja = Caja::abiertaActual();
         $caja?->load(['movimientos.usuario', 'usuario']);
-
         $resumen = $caja ? $caja->resumen() : null;
-
         $historial = Caja::with('usuario', 'cerradaPor')
             ->where('estado', 'cerrada')
             ->latest('cerrada_at')
             ->limit(10)
             ->get();
+        $porCobrar = Mesa::with('pedidoActivo')
+            ->where('estado', 'cuenta')
+            ->orderByRaw('CAST(numero AS UNSIGNED)')
+            ->get();
 
-        return view('modules.caja.index', compact('caja', 'resumen', 'historial'));
+        return view('modules.caja.index', compact('caja', 'resumen', 'historial', 'porCobrar'));
     }
 
     public function abrir(Request $request)
@@ -30,12 +33,10 @@ class CajaController extends Controller
         if (Caja::abiertaActual()) {
             return back()->with('error', 'Ya existe una caja abierta. Ciérrala antes de abrir otra.');
         }
-
         $data = $request->validate([
             'monto_inicial'  => 'required|numeric|min:0',
             'notas_apertura' => 'nullable|string|max:500',
         ]);
-
         Caja::create([
             'user_id'        => $request->user()->id,
             'estado'         => 'abierta',
@@ -43,7 +44,6 @@ class CajaController extends Controller
             'notas_apertura' => $data['notas_apertura'] ?? null,
             'abierta_at'     => now(),
         ]);
-
         return redirect()->route('caja.index')->with('success', 'Caja abierta correctamente.');
     }
 
@@ -53,14 +53,12 @@ class CajaController extends Controller
         if (! $caja) {
             return back()->with('error', 'No hay una caja abierta.');
         }
-
         $data = $request->validate([
             'tipo'        => 'required|in:ingreso,egreso',
             'concepto'    => 'required|string|max:255',
             'monto'       => 'required|numeric|min:0.01',
-            'metodo_pago' => 'nullable|in:efectivo,tarjeta,yape,plin,transferencia',
+            'metodo_pago' => 'nullable|in:efectivo,tarjeta,transferencia,oxxo,mercadopago,clip,codi',
         ]);
-
         $caja->movimientos()->create([
             'user_id'     => $request->user()->id,
             'tipo'        => $data['tipo'],
@@ -68,7 +66,6 @@ class CajaController extends Controller
             'monto'       => $data['monto'],
             'metodo_pago' => $data['metodo_pago'] ?? 'efectivo',
         ]);
-
         return back()->with('success', 'Movimiento registrado.');
     }
 
@@ -78,15 +75,12 @@ class CajaController extends Controller
         if (! $caja) {
             return back()->with('error', 'No hay una caja abierta.');
         }
-
         $data = $request->validate([
             'monto_contado' => 'required|numeric|min:0',
             'notas_cierre'  => 'nullable|string|max:500',
         ]);
-
         $resumen  = $caja->resumen();
         $esperado = $resumen['efectivo_esperado'];
-
         $caja->update([
             'estado'            => 'cerrada',
             'cerrada_por'       => $request->user()->id,
@@ -96,7 +90,6 @@ class CajaController extends Controller
             'notas_cierre'      => $data['notas_cierre'] ?? null,
             'cerrada_at'        => now(),
         ]);
-
         return redirect()->route('caja.show', $caja)->with('success', 'Caja cerrada. Aquí está el arqueo.');
     }
 
@@ -104,7 +97,6 @@ class CajaController extends Controller
     {
         $caja->load(['movimientos.usuario', 'usuario', 'cerradaPor']);
         $resumen = $caja->resumen();
-
         return view('modules.caja.show', compact('caja', 'resumen'));
     }
 }

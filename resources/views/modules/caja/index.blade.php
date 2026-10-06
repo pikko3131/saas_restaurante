@@ -7,7 +7,9 @@
         @endif
     </x-page-header>
 
-    @php $m = fn($v) => 'S/ '.number_format((float)$v, 2); @endphp
+    @include('modules.caja.por-cobrar')
+
+    @php $m = fn($v) => '$ '.number_format((float)$v, 2); @endphp
 
     @if(! $caja)
         {{-- ====== ABRIR CAJA ====== --}}
@@ -83,7 +85,7 @@
                 {{-- Ventas por método --}}
                 <div class="card mt-6">
                     <h3 class="mb-3 font-bold text-slate-800">Ventas por método de pago</h3>
-                    @php $metodos = ['efectivo'=>'Efectivo','tarjeta'=>'Tarjeta','yape'=>'Yape','plin'=>'Plin','transferencia'=>'Transferencia']; @endphp
+                    @php $metodos = ['efectivo'=>'Efectivo','tarjeta'=>'Tarjeta','transferencia'=>'Transferencia / SPEI','oxxo'=>'OXXO Pay','mercadopago'=>'Mercado Pago','clip'=>'Clip','codi'=>'CoDi']; @endphp
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                         @foreach($metodos as $k=>$label)
                             <div class="rounded-xl bg-slate-50 p-3">
@@ -109,7 +111,7 @@
                         <select name="tipo" class="form-input-c"><option value="ingreso">Ingreso (entra dinero)</option><option value="egreso">Egreso (sale dinero)</option></select>
                         <input name="concepto" required class="form-input-c" placeholder="Concepto (ej. compra de hielo)">
                         <input type="number" step="0.01" min="0.01" name="monto" required class="form-input-c" placeholder="Monto">
-                        <select name="metodo_pago" class="form-input-c"><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option><option value="yape">Yape</option><option value="plin">Plin</option><option value="transferencia">Transferencia</option></select>
+                        <select name="metodo_pago" class="form-input-c"><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option><option value="oxxo">OXXO Pay</option><option value="mercadopago">Mercado Pago</option><option value="clip">Clip</option><option value="transferencia">Transferencia / SPEI</option><option value="codi">CoDi</option></select>
                         <button class="btn-primary w-full">Registrar movimiento</button>
                     </form>
 

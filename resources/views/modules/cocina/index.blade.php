@@ -5,7 +5,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-extrabold text-slate-900">Comandas a Cocina</h1>
-                <p class="mt-0.5 text-sm text-slate-500">Tablero en tiempo real · se actualiza solo cada 7 segundos.</p>
+                <p class="mt-0.5 text-sm text-slate-500">Tablero en tiempo real · se actualiza solo y suena cuando entra una comanda.</p>
             </div>
             <div class="flex items-center gap-3">
                 <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
@@ -93,12 +93,30 @@
                     this.timer = setInterval(() => this.load(), 7000);
                     window.addEventListener('beforeunload', () => clearInterval(this.timer));
                 },
+                prevPendientes: null,
+                beep() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const o = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        o.type = 'square';
+                        o.frequency.value = 880;
+                        o.connect(g); g.connect(ctx.destination);
+                        g.gain.setValueAtTime(0.08, ctx.currentTime);
+                        o.start();
+                        o.stop(ctx.currentTime + 0.18);
+                    } catch (e) {}
+                },
                 async load() {
                     this.loading = true;
                     try {
-                        const r = await fetch("{{ route('cocina.data') }}", { headers: { 'Accept': 'application/json' } });
-                        this.data = await r.json();
-                    } catch (e) { /* silencio: reintenta en el próximo ciclo */ }
+                        const r = await fetch('/cocina/data', { headers: { 'Accept': 'application/json' } });
+                        const data = await r.json();
+                        const n = (data.pendientes || []).length;
+                        if (this.prevPendientes !== null && n > this.prevPendientes) this.beep();
+                        this.prevPendientes = n;
+                        this.data = data;
+                    } catch (e) { /* reintenta en el próximo ciclo */ }
                     this.loading = false;
                 },
                 async avanzar(p) {
