@@ -32,6 +32,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('mesero.index', absolute: false));
         }
 
+        if ($user->role === 'cocina') {
+            return redirect()->intended(route('cocina.index', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

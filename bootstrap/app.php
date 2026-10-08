@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Identifica el tenant en cada petición web (después de iniciar sesión).
         $middleware->web(append: [
             \App\Http\Middleware\IdentifyTenant::class,
+            \App\Http\Middleware\CocinaSoloPedidos::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
