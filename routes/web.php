@@ -56,6 +56,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::get('/mesero/carta', [MeseroController::class, 'carta'])->name('mesero.carta');
             Route::post('/mesero/pedir', [MeseroController::class, 'pedir'])->name('mesero.pedir');
             Route::post('/mesero/mesas/{mesa}/cuenta', [MeseroController::class, 'cuenta'])->name('mesero.cuenta');
+            Route::get('/mesero/mesas/{mesa}/cuenta-ver', [MeseroController::class, 'cuentaVer'])->name('mesero.cuenta.ver');
             Route::get('/mesero/pedidos/{pedido}/ticket', [MeseroController::class, 'ticket'])->name('mesero.ticket');
             Route::post('/mesero/pedidos/{pedido}/llevar', [MeseroController::class, 'llevar'])->name('mesero.llevar');
         });

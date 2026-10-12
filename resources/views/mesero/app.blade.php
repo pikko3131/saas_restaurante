@@ -232,11 +232,11 @@ function meseroApp() {
             const r = await fetch('/mesero/mesas/'+this.mesa.id+'/cuenta', { method:'POST', headers:{ 'Accept':'application/json', 'X-CSRF-TOKEN': csrf } });
             const data = await r.json();
             if (!r.ok) { this.error = data.mensaje || 'No se pudo pedir la cuenta'; return; }
-            this.ok = 'Mesa marcada para cobrar. Caja ya la ve.';
-            this.load();
+            this.ok = 'Cuenta lista.';
+            window.location.href = '/mesero/mesas/'+this.mesa.id+'/cuenta-ver';
         },
         verTicket() {
-            if (this.mesa?.pedido) window.open('/mesero/pedidos/'+this.mesa.pedido.id+'/ticket', '_blank');
+            if (this.mesa) window.location.href = '/mesero/mesas/'+this.mesa.id+'/cuenta-ver';
         },
         async llevar(p) {
             this.ok = ''; this.error = '';

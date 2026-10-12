@@ -196,6 +196,17 @@ class MeseroController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    public function cuentaVer(Request $request, Mesa $mesa)
+    {
+        $this->autorizarMesa($request->user(), $mesa);
+        $pedidos = Pedido::with('items')->where('mesa_id', $mesa->id)->whereNotIn('estado', ['pagado', 'cancelado'])->orderBy('created_at')->get();
+        $subtotal = $pedidos->sum('subtotal');
+        $impuesto = $pedidos->sum('impuesto');
+        $total = $pedidos->sum('total');
+        $config = Restaurante::actual();
+        return view('mesero.cuenta', compact('mesa', 'pedidos', 'config', 'subtotal', 'impuesto', 'total'));
+    }
+
     private function autorizarMesa($user, Mesa $mesa): void
     {
         if ($user->role === 'mesero' && (int) $mesa->mesero_id !== (int) $user->id) {
