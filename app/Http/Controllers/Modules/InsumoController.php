@@ -46,13 +46,19 @@ class InsumoController extends Controller
 
     private function validateData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string|max:1000',
             'unidad' => 'required|string|max:20',
             'stock' => 'required|numeric|min:0',
             'stock_minimo' => 'required|numeric|min:0',
             'costo' => 'nullable|numeric|min:0',
             'proveedor' => 'nullable|string|max:255',
+            'imagen' => 'nullable|image|max:2048',
         ]);
+        if ($request->hasFile('imagen')) {
+            $data['imagen'] = $request->file('imagen')->store('insumos', 'public');
+        }
+        return $data;
     }
 }

@@ -30,7 +30,12 @@
             <tbody class="divide-y divide-slate-50">
                 @forelse ($insumos as $ins)
                     <tr>
-                        <td class="py-3 font-semibold text-slate-700">{{ $ins->nombre }}</td>
+                        <td class="py-3 font-semibold text-slate-700">
+                            <div class="flex items-center gap-2">
+                                @if($ins->imagen)<img src="{{ asset('storage/'.$ins->imagen) }}" class="h-9 w-9 rounded-lg object-cover">@endif
+                                <div>{{ $ins->nombre }}@if($ins->descripcion)<p class="text-xs font-normal text-slate-400">{{ $ins->descripcion }}</p>@endif</div>
+                            </div>
+                        </td>
                         <td class="py-3">
                             <span class="badge {{ $ins->bajo_stock ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600' }}">
                                 {{ rtrim(rtrim(number_format($ins->stock,2),'0'),'.') }} {{ $ins->unidad }}

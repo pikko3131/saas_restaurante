@@ -33,8 +33,8 @@ class ProductoController extends Controller
         if ($rest && $rest->limiteAlcanzado('productos', Producto::count())) {
             return back()->withInput()->with('error', 'Alcanzaste el límite de productos de tu plan. Mejora tu plan en Suscripción para agregar más.');
         }
-        Producto::create($this->validateData($request));
-        return redirect()->route('productos.index')->with('success', 'Producto agregado a la carta.');
+        $p = Producto::create($this->validateData($request));
+        return redirect()->route('recetas.edit', $p)->with('success', 'Producto creado. Ahora agrega sus ingredientes.');
     }
 
     public function edit(Producto $producto)

@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Caja;
 use App\Models\CajaMovimiento;
 use App\Models\Mesa;
+use App\Models\Pedido;
+use App\Models\InsumoMovimiento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CajaController extends Controller
 {
@@ -20,12 +23,43 @@ class CajaController extends Controller
             ->latest('cerrada_at')
             ->limit(10)
             ->get();
-        $porCobrar = Mesa::with('pedidoActivo')
+        $porCobrar = Mesa::with(['pedidos' => fn ($q) => $q->whereNotIn('estado', ['pagado', 'cancelado'])->with('items')])
             ->where('estado', 'cuenta')
             ->orderByRaw('CAST(numero AS UNSIGNED)')
             ->get();
 
         return view('modules.caja.index', compact('caja', 'resumen', 'historial', 'porCobrar'));
+    }
+
+    public function cobrar(Request $request, Mesa $mesa)
+    {
+        $data = $request->validate([
+            'metodo_pago' => 'required|in:efectivo,tarjeta,transferencia',
+        ]);
+        $pedidos = Pedido::where('mesa_id', $mesa->id)->whereNotIn('estado', ['pagado', 'cancelado'])->get();
+        if ($pedidos->isEmpty()) {
+            return back()->with('error', 'Esa mesa no tiene cuenta abierta.');
+        }
+        DB::transaction(function () use ($pedidos, $mesa, $data) {
+            foreach ($pedidos as $p) {
+                $p->update([
+                    'estado' => 'pagado',
+                    'metodo_pago' => $data['metodo_pago'],
+                    'pagado_at' => now(),
+                ]);
+                $p->load('items.producto.recetas.insumo');
+                foreach ($p->items as $item) {
+                    foreach ($item->producto->recetas ?? [] as $r) {
+                        if ($r->insumo) {
+                            InsumoMovimiento::registrar($r->insumo, 'salida', (float) $r->cantidad * $item->cantidad, 'Cobro', $p->codigo, $request->user()->id);
+                        }
+                    }
+                }
+            }
+            $mesa->update(['estado' => 'libre']);
+        });
+        $total = number_format((float) $pedidos->sum('total'), 2);
+        return back()->with('success', "Mesa {$mesa->numero} cobrada. Total \${$total}.");
     }
 
     public function abrir(Request $request)

@@ -119,11 +119,7 @@ class MeseroController extends Controller
                 if ($prod->controla_stock) {
                     $prod->decrement('stock', $cant);
                 }
-                foreach ($prod->recetas as $r) {
-                    if ($r->insumo) {
-                        InsumoMovimiento::registrar($r->insumo, 'salida', (float) $r->cantidad * $cant, 'Venta', $pedido->codigo, $request->user()->id);
-                    }
-                }
+
             }
 
             $mesa->update(['estado' => 'ocupada']);

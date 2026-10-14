@@ -53,6 +53,11 @@
                 </label>
             </div>
 
+            @if($producto->exists)
+                <a href="{{ route('recetas.edit', $producto) }}" class="btn-secondary">Agregar ingredientes</a>
+            @else
+                <p class="text-sm text-slate-500">Guarda el platillo y enseguida te pide los ingredientes.</p>
+            @endif
             <div class="flex justify-end gap-2">
                 <a href="{{ route('productos.index') }}" class="btn-secondary">Cancelar</a>
                 <button class="btn-primary">Guardar</button>

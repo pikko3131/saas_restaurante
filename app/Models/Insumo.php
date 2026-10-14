@@ -14,7 +14,7 @@ class Insumo extends Model
     protected $table = 'insumos';
 
     protected $fillable = [
-        'restaurante_id', 'nombre', 'unidad', 'stock', 'stock_minimo', 'costo', 'proveedor',
+        'restaurante_id', 'nombre', 'imagen', 'descripcion', 'unidad', 'stock', 'stock_minimo', 'costo', 'proveedor',
     ];
 
     protected $casts = [
