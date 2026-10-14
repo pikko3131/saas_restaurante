@@ -76,6 +76,8 @@ class Caja extends Model
         $ventas    = $this->ventasPorMetodo();
         $ventasTot = (float) $ventas->sum();
         $efeVentas = (float) ($ventas['efectivo'] ?? 0);
+        $efeVentas += (float) Pedido::where('estado', 'pagado')->where('metodo_pago', 'mixto')->whereBetween('pagado_at', [$this->abierta_at, $hasta])->sum('pago_efectivo');
+        $efeVentas += (float) \App\Models\Cobro::whereBetween('created_at', [$this->abierta_at, $hasta])->sum('efectivo');
 
         $ingresos = (float) $this->movimientos()->where('tipo', 'ingreso')->sum('monto');
         $egresos  = (float) $this->movimientos()->where('tipo', 'egreso')->sum('monto');

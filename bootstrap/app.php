@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\IdentifyTenant::class,
             \App\Http\Middleware\CocinaSoloPedidos::class,
             \App\Http\Middleware\CajaSoloCaja::class,
+            \App\Http\Middleware\MeseroSoloSalon::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

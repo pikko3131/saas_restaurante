@@ -34,8 +34,21 @@ class CartaPublicaController extends Controller
 
         // Mesa opcional desde el QR (?mesa=NUMERO)
         $mesa = $request->query('mesa');
+        $cuenta = collect();
+        $mesaModel = null;
+        if ($mesa) {
+            $mesaModel = Mesa::where('restaurante_id', $restaurante->id)->where('numero', $mesa)->first();
+            if ($mesaModel) {
+                $cuenta = Pedido::with('items')
+                    ->where('restaurante_id', $restaurante->id)
+                    ->where('mesa_id', $mesaModel->id)
+                    ->whereNotIn('estado', ['pagado', 'cancelado'])
+                    ->orderBy('created_at')
+                    ->get();
+            }
+        }
 
-        return view('carta_publica', compact('restaurante', 'categorias', 'mesa'));
+        return view('carta_publica', compact('restaurante', 'categorias', 'mesa', 'cuenta', 'mesaModel'));
     }
 
     /** Recibe un pedido hecho por el cliente desde la carta (sin login). */
@@ -107,6 +120,19 @@ class CartaPublicaController extends Controller
         });
 
         event(new PedidoCambio($pedido->fresh(['mesa', 'items']), 'qr'));
+    }
+
+    public function cuenta(Request $request, Restaurante $restaurante)
+    {
+        abort_unless($restaurante->activo, 404);
+        $numero = $request->validate(['mesa' => 'required|string|max:30'])['mesa'];
+        $mesa = Mesa::where('restaurante_id', $restaurante->id)->where('numero', $numero)->first();
+        if (! $mesa) {
+            return back()->with('error', 'Esa mesa no existe.');
+        }
+        $mesa->update(['estado' => 'cuenta']);
+        return redirect()->route('carta.publica', ['restaurante' => $restaurante->slug, 'mesa' => $numero])
+            ->with('cuenta_ok', 'Cuenta pedida. Pasa a caja cuando quieras.');
 
         return redirect()
             ->route('carta.publica', $restaurante->slug)

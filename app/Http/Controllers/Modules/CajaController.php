@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Modules;
 
 use App\Http\Controllers\Controller;
 use App\Models\Caja;
+use App\Models\Cobro;
 use App\Models\CajaMovimiento;
 use App\Models\Mesa;
 use App\Models\Pedido;
@@ -38,7 +39,10 @@ class CajaController extends Controller
             return back()->with('error', 'Abre la caja del día antes de cobrar.');
         }
         $data = $request->validate([
-            'metodo_pago' => 'required|in:efectivo,tarjeta,transferencia',
+            'metodo_pago' => 'required|in:efectivo,tarjeta,transferencia,mixto',
+            'pago_efectivo' => 'nullable|numeric|min:0',
+            'pago_tarjeta' => 'nullable|numeric|min:0',
+            'cobrar_ahora' => 'nullable|numeric|min:0',
             'descuento_tipo' => 'nullable|in:monto,porcentaje',
             'descuento' => 'nullable|numeric|min:0',
             'descuento_motivo' => 'nullable|string|max:255',
@@ -65,6 +69,32 @@ class CajaController extends Controller
         $aPagar = round($subtotal - $descuento + $propina, 2);
         $recibido = (float) ($data['recibido'] ?? 0);
         $cambio = 0.0;
+        $efe = (float) ($data['pago_efectivo'] ?? 0);
+        $tar = (float) ($data['pago_tarjeta'] ?? 0);
+        if ($data['metodo_pago'] === 'mixto') {
+            if (abs(($efe + $tar) - $aPagar) > 0.05) {
+                return back()->with('error', 'Efectivo + tarjeta tiene que sumar el total.')->withInput();
+            }
+        } else {
+            $efe = $data['metodo_pago'] === 'efectivo' ? $aPagar : 0;
+            $tar = $data['metodo_pago'] === 'tarjeta' ? $aPagar : 0;
+        }
+        $ahora = (float) ($data['cobrar_ahora'] ?? 0);
+        if ($ahora > 0 && $ahora + 0.001 < $aPagar) {
+            Cobro::create([
+                'mesa_id' => $mesa->id,
+                'user_id' => auth()->id(),
+                'monto' => $ahora,
+                'metodo_pago' => $data['metodo_pago'],
+                    'pago_efectivo' => $primero ? $efe : 0,
+                    'pago_tarjeta' => $primero ? $tar : 0,
+                'efectivo' => $data['metodo_pago'] === 'efectivo' ? $ahora : ($data['metodo_pago'] === 'mixto' ? min($efe, $ahora) : 0),
+                'tarjeta' => $data['metodo_pago'] === 'tarjeta' ? $ahora : 0,
+            ]);
+            $primero = $pedidos->first();
+            $primero->increment('abonado', $ahora);
+            return back()->with('success', 'Abono de $'.number_format($ahora, 2).' registrado. Falta $'.number_format($aPagar - $ahora - (float) $primero->abonado + $ahora, 2).'.');
+        }
         if ($data['metodo_pago'] === 'efectivo') {
             if ($recibido + 0.001 < $aPagar) {
                 return back()->with('error', 'El efectivo recibido no alcanza.')->withInput();
@@ -77,6 +107,8 @@ class CajaController extends Controller
                 $p->update([
                     'estado' => 'pagado',
                     'metodo_pago' => $data['metodo_pago'],
+                    'pago_efectivo' => $primero ? $efe : 0,
+                    'pago_tarjeta' => $primero ? $tar : 0,
                     'pagado_at' => now(),
                     'descuento' => $primero ? $descuento : (float) $p->descuento,
                     'propina' => $primero ? $propina : 0,

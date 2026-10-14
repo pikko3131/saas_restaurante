@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Modules;
 
 use App\Http\Controllers\Controller;
+use App\Models\Mesa;
 use App\Models\Restaurante;
 
 class CartaQrController extends Controller
@@ -12,7 +13,8 @@ class CartaQrController extends Controller
     {
         $restaurante = Restaurante::actual();
         $url = route('carta.publica', $restaurante->slug);
+        $mesas = Mesa::orderByRaw('CAST(numero AS UNSIGNED)')->get();
 
-        return view('modules.carta_qr.index', compact('restaurante', 'url'));
+        return view('modules.carta_qr.index', compact('restaurante', 'url', 'mesas'));
     }
 }

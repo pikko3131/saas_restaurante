@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/carta/{restaurante:slug}', [CartaPublicaController::class, 'show'])->name('carta.publica');
 Route::post('/carta/{restaurante:slug}/pedido', [CartaPublicaController::class, 'pedido'])->name('carta.pedido');
+Route::post('/carta/{restaurante:slug}/cuenta', [CartaPublicaController::class, 'cuenta'])->name('carta.cuenta');
 Route::post('/webhooks/rappi', [\App\Http\Controllers\Api\DeliveryWebhookController::class, 'rappi'])->name('webhooks.rappi');
 Route::post('/webhooks/ubereats', [\App\Http\Controllers\Api\DeliveryWebhookController::class, 'ubereats'])->name('webhooks.ubereats');
 
@@ -86,6 +87,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::post('/cocina/items/{item}/listo', [CocinaController::class, 'itemListo'])->name('cocina.item');
         Route::post('/cocina/{pedido}/prioridad', [CocinaController::class, 'prioridad'])->name('cocina.prioridad');
         Route::post('/cocina/{pedido}/recall', [CocinaController::class, 'recall'])->name('cocina.recall');
+        Route::get('/cocina/agotados', [CocinaController::class, 'agotados'])->name('cocina.agotados');
+        Route::post('/cocina/productos/{producto}/agotado', [CocinaController::class, 'agotado'])->name('cocina.agotado');
         Route::get('/caja', [CajaController::class, 'index'])->name('caja.index');
         Route::post('/caja/mesas/{mesa}/cobrar', [CajaController::class, 'cobrar'])->name('caja.cobrar');
         Route::post('/caja/abrir', [CajaController::class, 'abrir'])->name('caja.abrir');

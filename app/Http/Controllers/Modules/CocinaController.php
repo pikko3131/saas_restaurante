@@ -4,6 +4,7 @@ use App\Events\PedidoCambio;
 use App\Http\Controllers\Controller;
 use App\Models\Pedido;
 use App\Models\PedidoItem;
+use App\Models\Producto;
 class CocinaController extends Controller
 {
     public function index()
@@ -108,5 +109,17 @@ class CocinaController extends Controller
             $pedido->mesa->update(['estado' => 'libre']);
         }
         return response()->json(['ok' => true, 'estado' => 'cancelado']);
+    }
+
+    public function agotado(Producto $producto)
+    {
+        $producto->update(['disponible' => ! $producto->disponible]);
+        return response()->json(['ok' => true, 'disponible' => (bool) $producto->disponible]);
+    }
+
+    public function agotados()
+    {
+        $items = Producto::orderBy('nombre')->get(['id', 'nombre', 'disponible']);
+        return response()->json($items);
     }
 }

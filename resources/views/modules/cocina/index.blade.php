@@ -5,9 +5,18 @@
                 <h1 class="text-2xl font-extrabold text-slate-900">Comandas a Cocina</h1>
                 <p class="text-sm text-slate-500">Toca un platillo para marcarlo. Al quedar todos listos, suena el celular del mesero.</p>
             </div>
+            <button @click="panel=!panel; if(panel) cargarAgotados()" class="btn-secondary">Agotados</button>
             <button @click="load()" class="btn-secondary">Actualizar</button>
         </div>
 
+        <div x-show="panel" class="rounded-2xl bg-white p-3 shadow-sm">
+            <p class="mb-2 text-sm font-bold text-slate-700">Toca para agotar o volver a poner</p>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="p in productos" :key="p.id">
+                    <button @click="toggleAgotado(p)" class="rounded-full px-3 py-1 text-xs font-bold" :class="p.disponible ? 'bg-slate-100 text-slate-700' : 'bg-rose-600 text-white'" x-text="p.nombre"></button>
+                </template>
+            </div>
+        </div>
         <div class="flex gap-2 overflow-x-auto pb-1" x-show="data.conteo.length">
             <template x-for="c in data.conteo" :key="c.nombre">
                 <span class="shrink-0 rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
@@ -38,10 +47,10 @@
     <script>
         function kds() {
             return {
-                data: { pendientes: [], preparando: [], listos: [], conteo: [] },
+                data: { pendientes: [], preparando: [], listos: [], conteo: [] }, panel: false, productos: [],
                 prev: null,
                 csrf: document.querySelector('meta[name="csrf-token"]').content,
-                init() { this.load(); setInterval(() => this.load(), 6000); },
+                init() { window.kdsPost = (url) => this.post(url); this.load(); setInterval(() => this.load(), 6000); },
                 beep() {
                     try {
                         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -58,6 +67,14 @@
                     this.prev = n;
                     this.data = data;
                 },
+                async cargarAgotados() {
+                    const r = await fetch('/cocina/agotados', { headers: { Accept: 'application/json' } });
+                    this.productos = await r.json();
+                },
+                async toggleAgotado(p) {
+                    await this.post('/cocina/productos/' + p.id + '/agotado');
+                    p.disponible = !p.disponible;
+                },
                 async post(url) {
                     await fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': this.csrf, Accept: 'application/json' } });
                     this.load();
@@ -71,15 +88,15 @@
                     const dest = p.mesa ? `Mesa ${p.mesa}` : (p.tipo === 'delivery' ? 'Delivery' : 'Para llevar');
                     const color = p.minutos >= 15 ? 'bg-rose-100 text-rose-700' : (p.minutos >= 8 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
                     const items = p.items.map(i => `
-                        <button onclick="document.querySelector('[x-data]').__x.$data.post('/cocina/items/${i.id}/listo')" class="flex w-full items-start gap-2 py-1 text-left text-sm ${i.listo ? 'opacity-40 line-through' : ''}">
+                        <button onclick="window.kdsPost('/cocina/items/${i.id}/listo')" class="flex w-full items-start gap-2 py-1 text-left text-sm ${i.listo ? 'opacity-40 line-through' : ''}">
                             <span class="mt-0.5 flex h-5 min-w-[20px] items-center justify-center rounded ${i.listo ? 'bg-emerald-600' : 'bg-brand-600'} px-1 text-xs font-bold text-white">${i.cantidad}</span>
                             <span class="flex-1">${i.nombre}${this.nota(i.notas)}</span>
                         </button>`).join('');
                     const pri = p.prioridad ? '<span class="ml-2 rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">URGENTE</span>' : '';
                     let acc = '';
-                    if (modo === 'empezar') acc = `<button onclick="document.querySelector('[x-data]').__x.$data.post('/cocina/${p.id}/avanzar')" class="mt-3 w-full rounded-lg bg-brand-600 py-2 text-sm font-semibold text-white">Empezar</button>`;
-                    if (modo === 'listo') acc = `<button onclick="document.querySelector('[x-data]').__x.$data.post('/cocina/${p.id}/avanzar')" class="mt-3 w-full rounded-lg bg-emerald-600 py-2 text-sm font-semibold text-white">Todo listo</button>`;
-                    if (modo === 'recall') acc = `<button onclick="document.querySelector('[x-data]').__x.$data.post('/cocina/${p.id}/recall')" class="mt-3 w-full rounded-lg bg-slate-700 py-2 text-sm font-semibold text-white">Deshacer</button>`;
+                    if (modo === 'empezar') acc = `<button onclick="window.kdsPost('/cocina/${p.id}/avanzar')" class="mt-3 w-full rounded-lg bg-brand-600 py-2 text-sm font-semibold text-white">Empezar</button>`;
+                    if (modo === 'listo') acc = `<button onclick="window.kdsPost('/cocina/${p.id}/avanzar')" class="mt-3 w-full rounded-lg bg-emerald-600 py-2 text-sm font-semibold text-white">Todo listo</button>`;
+                    if (modo === 'recall') acc = `<button onclick="window.kdsPost('/cocina/${p.id}/recall')" class="mt-3 w-full rounded-lg bg-slate-700 py-2 text-sm font-semibold text-white">Deshacer</button>`;
                     return `<article class="mb-3 rounded-xl bg-white p-4 shadow-sm ${p.prioridad ? 'ring-2 ring-rose-400' : 'ring-1 ring-slate-100'}">
                         <div class="flex items-center justify-between">
                             <div><p class="text-xs font-mono text-slate-400">${p.codigo}</p><p class="font-extrabold text-slate-800">${dest}${pri}</p></div>
@@ -88,8 +105,8 @@
                         <div class="mt-2 divide-y divide-slate-50">${items}</div>
                         ${this.nota(p.notas)}
                         <div class="mt-2 flex gap-2">
-                            <button onclick="document.querySelector('[x-data]').__x.$data.post('/cocina/${p.id}/prioridad')" class="flex-1 rounded-lg bg-rose-50 py-1.5 text-xs font-bold text-rose-700">${p.prioridad ? 'Quitar urgente' : 'Urgente'}</button>
-                            <button onclick="if(confirm('¿Cancelar esta comanda?')) document.querySelector('[x-data]').__x.$data.post('/cocina/${p.id}/cancelar')" class="flex-1 rounded-lg bg-slate-100 py-1.5 text-xs font-bold text-slate-600">Cancelar</button>
+                            <button onclick="window.kdsPost('/cocina/${p.id}/prioridad')" class="flex-1 rounded-lg bg-rose-50 py-1.5 text-xs font-bold text-rose-700">${p.prioridad ? 'Quitar urgente' : 'Urgente'}</button>
+                            <button onclick="if(confirm('¿Cancelar esta comanda?')) window.kdsPost('/cocina/${p.id}/cancelar')" class="flex-1 rounded-lg bg-slate-100 py-1.5 text-xs font-bold text-slate-600">Cancelar</button>
                         </div>
                         ${acc}
                     </article>`;
