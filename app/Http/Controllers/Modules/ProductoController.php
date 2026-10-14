@@ -70,6 +70,9 @@ class ProductoController extends Controller
         ]);
         $data['disponible'] = $request->boolean('disponible');
         $data['controla_stock'] = $request->boolean('controla_stock');
+        if (!isset($data['stock']) || $data['stock'] === '' || $data['stock'] === null) {
+            $data['stock'] = 0;
+        }
         return $data;
     }
 }

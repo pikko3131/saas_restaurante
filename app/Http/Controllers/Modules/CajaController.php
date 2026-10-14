@@ -51,7 +51,7 @@ class CajaController extends Controller
                 foreach ($p->items as $item) {
                     foreach ($item->producto->recetas ?? [] as $r) {
                         if ($r->insumo) {
-                            InsumoMovimiento::registrar($r->insumo, 'salida', (float) $r->cantidad * $item->cantidad, 'Cobro', $p->codigo, $request->user()->id);
+                            InsumoMovimiento::registrar($r->insumo, 'salida', (float) $r->cantidad * $item->cantidad, 'Cobro', $p->codigo, auth()->id());
                         }
                     }
                 }
@@ -72,7 +72,7 @@ class CajaController extends Controller
             'notas_apertura' => 'nullable|string|max:500',
         ]);
         Caja::create([
-            'user_id'        => $request->user()->id,
+            'user_id'        => auth()->id(),
             'estado'         => 'abierta',
             'monto_inicial'  => $data['monto_inicial'],
             'notas_apertura' => $data['notas_apertura'] ?? null,
@@ -94,7 +94,7 @@ class CajaController extends Controller
             'metodo_pago' => 'nullable|in:efectivo,tarjeta,transferencia,oxxo,mercadopago,clip,codi',
         ]);
         $caja->movimientos()->create([
-            'user_id'     => $request->user()->id,
+            'user_id'     => auth()->id(),
             'tipo'        => $data['tipo'],
             'concepto'    => $data['concepto'],
             'monto'       => $data['monto'],
@@ -117,7 +117,7 @@ class CajaController extends Controller
         $esperado = $resumen['efectivo_esperado'];
         $caja->update([
             'estado'            => 'cerrada',
-            'cerrada_por'       => $request->user()->id,
+            'cerrada_por'       => auth()->id(),
             'efectivo_esperado' => $esperado,
             'monto_contado'     => $data['monto_contado'],
             'diferencia'        => round($data['monto_contado'] - $esperado, 2),

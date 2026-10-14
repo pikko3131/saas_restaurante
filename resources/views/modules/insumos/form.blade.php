@@ -25,9 +25,12 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-slate-700">Unidad *</label>
-                    <input name="unidad" value="{{ old('unidad', $insumo->unidad ?? 'g') }}" class="form-input-c" list="unidades" required>
-                    <datalist id="unidades"><option>g</option><option>kg</option><option>ml</option><option>lt</option><option>unidad</option><option>caja</option></datalist>
-                    <p class="mt-1 text-xs text-slate-400">Usa siempre la misma. Si aquí pones g, en la receta también van gramos.</p>
+                    <select name="unidad" class="form-input-c" required>
+                        @foreach (['g' => 'Gramos (g)', 'kg' => 'Kilos (kg)', 'mg' => 'Miligramos (mg)', 'L' => 'Litros (L)', 'ml' => 'Mililitros (ml)'] as $u => $label)
+                            <option value="{{ $u }}" @selected(old('unidad', $insumo->unidad ?? 'g') === $u)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-xs text-slate-400">Usa siempre la misma. Si aquí eliges g, en la receta también van gramos.</p>
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-slate-700">Costo por unidad</label>

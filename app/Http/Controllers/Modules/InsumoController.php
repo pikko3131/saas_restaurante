@@ -49,7 +49,7 @@ class InsumoController extends Controller
         $data = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string|max:1000',
-            'unidad' => 'required|string|max:20',
+            'unidad' => 'required|in:g,kg,mg,L,ml',
             'stock' => 'required|numeric|min:0',
             'stock_minimo' => 'required|numeric|min:0',
             'costo' => 'nullable|numeric|min:0',
@@ -58,6 +58,9 @@ class InsumoController extends Controller
         ]);
         if ($request->hasFile('imagen')) {
             $data['imagen'] = $request->file('imagen')->store('insumos', 'public');
+        }
+        if (!isset($data['costo']) || $data['costo'] === '' || $data['costo'] === null) {
+            $data['costo'] = 0;
         }
         return $data;
     }
