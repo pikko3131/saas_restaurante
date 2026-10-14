@@ -14,8 +14,8 @@ class Pedido extends Model
     protected $table = 'pedidos';
 
     protected $fillable = [
-        'restaurante_id', 'codigo', 'mesa_id', 'cliente_id', 'user_id', 'tipo', 'estado',
-        'subtotal', 'descuento', 'impuesto', 'total', 'metodo_pago', 'notas', 'pagado_at',
+        'restaurante_id', 'codigo', 'mesa_id', 'cliente_id', 'user_id', 'tipo', 'estado', 'prioridad',
+        'subtotal', 'descuento', 'impuesto', 'total', 'metodo_pago', 'notas', 'pagado_at', 'propina', 'recibido', 'cambio', 'descuento_motivo',
         'entregado_at', 'promocion_id', 'puntos_usados', 'puntos_ganados',
         'delivery_direccion', 'delivery_telefono', 'delivery_referencia', 'delivery_costo_envio',
         'delivery_repartidor', 'delivery_estado',

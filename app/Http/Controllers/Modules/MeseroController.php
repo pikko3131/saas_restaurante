@@ -228,6 +228,7 @@ class MeseroController extends Controller
                 'nombre' => $i->nombre_producto,
                 'cantidad' => $i->cantidad,
                 'notas' => $i->notas,
+                'listo' => (bool) $i->listo,
             ])->values(),
         ];
     }

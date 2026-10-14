@@ -1,11 +1,25 @@
 <x-app-layout title="Caja">
-    <x-page-header title="Caja" subtitle="Apertura, movimientos y arqueo de caja.">
+    <x-page-header title="Caja" subtitle="Un corte por día. Abre al iniciar y cierra al terminar.">
         @if($caja)
             <span class="badge bg-emerald-50 text-emerald-700">● Caja abierta</span>
         @else
             <span class="badge bg-slate-100 text-slate-500">Caja cerrada</span>
         @endif
     </x-page-header>
+
+@if($caja && ! $caja->abierta_at->isToday())
+        <div class="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+            Esta caja es del {{ $caja->abierta_at->format('d/m/Y') }}. Ciérrala para hacer el corte. La de hoy se abre después.
+        </div>
+    @elseif($caja)
+        <div class="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            Caja de hoy, abierta a las {{ $caja->abierta_at->format('H:i') }}. Al terminar el día haz el corte.
+        </div>
+    @else
+        <div class="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            No hay caja abierta hoy. Abre la del {{ now()->format('d/m/Y') }} antes de cobrar.
+        </div>
+    @endif
 
     @include('modules.caja.por-cobrar')
 
@@ -18,7 +32,7 @@
                 <div class="mb-4 flex items-center gap-3">
                     <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-2xl">🔓</span>
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800">Abrir caja</h2>
+                        <h2 class="text-lg font-bold text-slate-800">Abrir caja de hoy</h2>
                         <p class="text-sm text-slate-500">Registra el monto con el que inicias el turno.</p>
                     </div>
                 </div>
@@ -126,7 +140,7 @@
                             <input type="number" step="0.01" min="0" name="monto_contado" required class="form-input-c" placeholder="0.00">
                         </div>
                         <textarea name="notas_cierre" rows="2" class="form-input-c" placeholder="Notas de cierre (opcional)"></textarea>
-                        <button class="btn-danger w-full">Cerrar caja y ver arqueo</button>
+                        <button class="btn-danger w-full">Hacer corte del día</button>
                     </form>
                 </div>
             </div>

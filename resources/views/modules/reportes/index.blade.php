@@ -11,6 +11,9 @@
 
     {{-- Filtro de fechas --}}
     <form method="GET" class="card mb-6 flex flex-wrap items-end gap-3 bg-white shadow-sm border border-slate-200">
+        <a href="{{ route('reportes.index', ['periodo' => 'hoy']) }}" class="btn-secondary text-xs">Hoy</a>
+        <a href="{{ route('reportes.index', ['periodo' => 'semana']) }}" class="btn-secondary text-xs">Semana</a>
+        <a href="{{ route('reportes.index', ['periodo' => 'mes']) }}" class="btn-secondary text-xs">Mes</a>
         <div>
             <label class="mb-1 block text-xs font-semibold text-slate-500">Fecha Desde</label>
             <input type="date" name="desde" value="{{ \Illuminate\Support\Carbon::parse($desde)->toDateString() }}" class="form-input-c">
@@ -55,6 +58,8 @@
             <button @click="tab = 'metodos'" :class="tab === 'metodos' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">💳 4. Métodos de Pago</button>
             <button @click="tab = 'canales'" :class="tab === 'canales' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">🛵 5. Tipos de Pedido / Canales</button>
             <button @click="tab = 'inventario'" :class="tab === 'inventario' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">📦 6. Consumo de Inventario</button>
+            <button @click="tab = 'platillos'" :class="tab === 'platillos' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">🍽️ 9. Platillos e ingredientes</button>
+            <button @click="tab = 'compras'" :class="tab === 'compras' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">🛒 10. Compras</button>
             <button @click="tab = 'clientes'" :class="tab === 'clientes' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">👥 7. Fidelización y Clientes</button>
             <button @click="tab = 'cajas'" :class="tab === 'cajas' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100'" class="rounded-xl px-4 py-2 text-xs font-bold transition-all">💰 8. Auditoría de Cajas</button>
         </div>
@@ -381,7 +386,8 @@
             }
 
             // Gráfica de Métodos de Pago
-            const metodos = @json($porMetodo->pluck('metodo_pago').map(fn($v) => strtoupper($v ?? 'Otro')));
+            @php $metodosLabels = $porMetodo->pluck('metodo_pago')->map(function ($v) { return strtoupper($v ?? 'Otro'); })->values(); @endphp
+            const metodos = @json($metodosLabels);
             const montosMetodo = @json($porMetodo->pluck('t'));
             if (metodos.length && document.querySelector('#chartMetodo')) {
                 new ApexCharts(document.querySelector('#chartMetodo'), {

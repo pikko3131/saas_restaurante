@@ -124,7 +124,7 @@
                             <li>
                                 <span class="font-semibold" x-text="it.cantidad+'×'"></span>
                                 <span x-text="it.nombre"></span>
-                                <span x-show="it.notas" class="block text-xs text-slate-400" x-text="it.notas"></span>
+                                <span x-show="it.listo" class="ml-1 text-xs font-bold text-emerald-600">listo</span><span x-show="it.notas" class="block text-xs text-slate-400" x-text="it.notas"></span>
                             </li>
                         </template>
                     </ul>
@@ -156,6 +156,7 @@ function meseroApp() {
         ok: '',
         enviando: false,
         timer: null,
+        prevListos: null,
         get porLlevar() { return this.pedidos.filter(p => p.puede_llevar); },
         get filtrados() {
             return this.productos.filter(p => !this.cat || p.categoria_id === this.cat);
@@ -177,11 +178,31 @@ function meseroApp() {
                 servido:'bg-emerald-100 text-emerald-800'
             }[e] || 'bg-slate-100 text-slate-600';
         },
+        beep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = ctx.createOscillator(); const g = ctx.createGain();
+                o.type = 'sine'; o.frequency.value = 1040; o.connect(g); g.connect(ctx.destination);
+                g.gain.setValueAtTime(0.15, ctx.currentTime); o.start(); o.stop(ctx.currentTime + 0.35);
+                setTimeout(() => { const o2 = ctx.createOscillator(); const g2 = ctx.createGain(); o2.frequency.value = 1318; o2.connect(g2); g2.connect(ctx.destination); g2.gain.setValueAtTime(0.15, ctx.currentTime); o2.start(); o2.stop(ctx.currentTime + 0.4); }, 180);
+            } catch (e) {}
+            if (navigator.vibrate) navigator.vibrate([250, 80, 250, 80, 400]);
+        },
         async load() {
             try {
                 const r = await fetch('/mesero/live', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
                 if (!r.ok) throw new Error('No se pudo leer el salón');
                 const data = await r.json();
+                const listos = (data.pedidos || []).filter(p => p.estado === 'servido' && !p.entregado).map(p => p.id);
+                if (this.prevListos) {
+                    const nuevos = listos.filter(id => !this.prevListos.includes(id));
+                    if (nuevos.length) {
+                        this.beep();
+                        const p = data.pedidos.find(x => x.id === nuevos[0]);
+                        this.ok = 'Listo para llevar: mesa ' + (p?.mesa || '');
+                    }
+                }
+                this.prevListos = listos;
                 this.mesas = data.mesas;
                 this.pedidos = data.pedidos;
                 if (this.mesa) this.mesa = this.mesas.find(m => m.id === this.mesa.id) || this.mesa;

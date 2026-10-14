@@ -14,7 +14,7 @@ class PedidoItem extends Model
     protected $table = 'pedido_items';
 
     protected $fillable = [
-        'restaurante_id', 'pedido_id', 'producto_id', 'nombre_producto', 'cantidad', 'precio', 'subtotal', 'notas',
+        'restaurante_id', 'pedido_id', 'producto_id', 'nombre_producto', 'cantidad', 'precio', 'subtotal', 'notas', 'listo', 'listo_at',
     ];
 
     protected $casts = [

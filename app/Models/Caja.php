@@ -37,6 +37,11 @@ class Caja extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function user()
+    {
+        return $this->usuario();
+    }
+
     public function cerradaPor()
     {
         return $this->belongsTo(User::class, 'cerrada_por');

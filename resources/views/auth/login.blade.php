@@ -82,6 +82,19 @@
                     <span class="font-mono text-sm text-slate-600">super@saas.test</span>
                     <span class="badge bg-emerald-100 text-emerald-700">Super Admin</span>
                 </button>
+                <button type="button" @click="set('mesero1@restaurante.test','password')" class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-brand-50">
+                    <span class="font-mono text-sm text-slate-600">mesero1@restaurante.test</span>
+                    <span class="badge bg-amber-100 text-amber-700">Mesero</span>
+                </button>
+                <button type="button" @click="set('cocina1@restaurante.test','password')" class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-brand-50">
+                    <span class="font-mono text-sm text-slate-600">cocina1@restaurante.test</span>
+                    <span class="badge bg-orange-100 text-orange-700">Cocina</span>
+                </button>
+                <button type="button" @click="set('cajero1@restaurante.test','password')" class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-brand-50">
+                    <span class="font-mono text-sm text-slate-600">cajero1@restaurante.test</span>
+                    <span class="badge bg-sky-100 text-sky-700">Caja</span>
+                </button>
+
             </div>
         </div>
 

@@ -37,6 +37,10 @@
         ]];
     }
 
+    $soloCaja = $u->role === 'cajero';
+    if ($soloCaja) {
+        $nav = [["Caja", [["caja", "Caja", "route" => "caja.index", "pattern" => "caja*", "icon" => "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 12h12l-3-3m0 6l3-3"]]]];
+    }
     $soloCocina = $u->role === 'cocina';
     if ($soloCocina) {
         $nav = [["Cocina", [["cocina", "Pedidos", "route" => "cocina.index", "pattern" => "cocina*", "icon" => "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"]]]];

@@ -100,8 +100,20 @@ class ReporteController extends Controller
     /** Cálculos compartidos por las vistas y exportaciones de los 8 reportes. */
     private function datos(Request $request): array
     {
-        $desde = $request->date('desde') ?? now()->startOfMonth();
-        $hasta = $request->date('hasta') ?? now()->endOfDay();
+        $periodo = $request->get('periodo');
+        if ($periodo === 'hoy') {
+            $desde = now()->startOfDay();
+            $hasta = now()->endOfDay();
+        } elseif ($periodo === 'semana') {
+            $desde = now()->startOfWeek();
+            $hasta = now()->endOfDay();
+        } elseif ($periodo === 'mes') {
+            $desde = now()->startOfMonth();
+            $hasta = now()->endOfDay();
+        } else {
+            $desde = $request->date('desde') ?? now()->startOfMonth();
+            $hasta = ($request->date('hasta') ?? now())->endOfDay();
+        }
         $restauranteId = auth()->user()->restaurante_id;
 
         $base = Pedido::where('estado', 'pagado')->whereBetween('pagado_at', [$desde, $hasta]);
@@ -221,16 +233,60 @@ class ReporteController extends Controller
             ->get();
 
         // 11. Reporte de Cierres de Caja / Arqueos en el período
-        $cierresCaja = Caja::with('user')
+        $cierresCaja = Caja::with('usuario')
             ->where('restaurante_id', $restauranteId)
             ->whereBetween('created_at', [$desde, $hasta])
             ->latest()
             ->get();
 
+        
+        $consumoPlatillos = \Illuminate\Support\Facades\DB::table('pedido_items')
+            ->join('pedidos', 'pedidos.id', '=', 'pedido_items.pedido_id')
+            ->join('recetas', 'recetas.producto_id', '=', 'pedido_items.producto_id')
+            ->join('insumos', 'insumos.id', '=', 'recetas.insumo_id')
+            ->where('pedidos.estado', 'pagado')
+            ->where('pedidos.restaurante_id', $restauranteId)
+            ->whereBetween('pedidos.pagado_at', [$desde, $hasta])
+            ->select(
+                'pedido_items.nombre_producto',
+                'insumos.nombre as insumo',
+                'insumos.unidad',
+                \Illuminate\Support\Facades\DB::raw('SUM(pedido_items.cantidad) as unidades'),
+                \Illuminate\Support\Facades\DB::raw('SUM(recetas.cantidad * pedido_items.cantidad) as consumido')
+            )
+            ->groupBy('pedido_items.nombre_producto', 'insumos.id', 'insumos.nombre', 'insumos.unidad')
+            ->orderBy('pedido_items.nombre_producto')
+            ->get()
+            ->groupBy('nombre_producto');
+        $compras = \Illuminate\Support\Facades\DB::table('insumo_movimientos')
+            ->join('insumos', 'insumos.id', '=', 'insumo_movimientos.insumo_id')
+            ->where('insumo_movimientos.restaurante_id', $restauranteId)
+            ->where('insumo_movimientos.tipo', 'entrada')
+            ->whereBetween('insumo_movimientos.created_at', [$desde, $hasta])
+            ->select(
+                'insumos.nombre',
+                'insumos.unidad',
+                \Illuminate\Support\Facades\DB::raw('COUNT(*) as veces'),
+                \Illuminate\Support\Facades\DB::raw('SUM(insumo_movimientos.cantidad) as cantidad'),
+                \Illuminate\Support\Facades\DB::raw('SUM(insumo_movimientos.cantidad * insumos.costo) as costo')
+            )
+            ->groupBy('insumos.id', 'insumos.nombre', 'insumos.unidad')
+            ->orderByDesc('cantidad')
+            ->get();
+        $comprasDetalle = \Illuminate\Support\Facades\DB::table('insumo_movimientos')
+            ->join('insumos', 'insumos.id', '=', 'insumo_movimientos.insumo_id')
+            ->where('insumo_movimientos.restaurante_id', $restauranteId)
+            ->where('insumo_movimientos.tipo', 'entrada')
+            ->whereBetween('insumo_movimientos.created_at', [$desde, $hasta])
+            ->select('insumo_movimientos.created_at', 'insumos.nombre', 'insumos.unidad', 'insumo_movimientos.cantidad', 'insumo_movimientos.motivo')
+            ->orderByDesc('insumo_movimientos.created_at')
+            ->limit(50)
+            ->get();
         return [$desde, $hasta, compact(
             'totalVentas', 'numPedidos', 'ticketPromedio', 'porDia', 'porHora', 'porMetodo', 'porTipo',
             'porMesero', 'topProductos', 'rentabilidad', 'ingresoTotalR', 'costoTotalR', 'gananciaTotalR',
-            'margenTotalR', 'insumosConsumo', 'topClientes', 'cierresCaja'
+            'margenTotalR', 'insumosConsumo', 'topClientes', 'cierresCaja',
+            'consumoPlatillos', 'compras', 'comprasDetalle', 'periodo'
         )];
     }
 }
