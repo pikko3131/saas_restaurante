@@ -41,6 +41,21 @@
         </div>
     </div>
 
+    <div class="card mt-6">
+        <h3 class="mb-1 font-bold text-slate-800">QR por mesa</h3>
+        <p class="mb-4 text-sm text-slate-500">Se generan solos. Agregas una mesa y aquí aparece su QR, con el número ya puesto. Imprímelo o abre el enlace en la tablet de esa mesa.</p>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            @foreach($mesas as $m)
+                @php $mu = $url.'?mesa='.$m->numero; @endphp
+                <div class="rounded-xl bg-slate-50 p-3 text-center">
+                    <p class="font-bold text-slate-800">Mesa {{ $m->numero }}</p>
+                    <div class="mx-auto my-2 w-fit" id="qr-{{ $m->id }}"></div>
+                    <a href="{{ $mu }}" target="_blank" class="text-xs font-semibold text-brand-700">Abrir en tablet</a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
     @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
@@ -65,6 +80,11 @@
             }
         }
         document.addEventListener('alpine:init', () => {});
+        document.addEventListener('DOMContentLoaded', () => {
+            @foreach($mesas as $m)
+            new QRCode(document.getElementById('qr-{{ $m->id }}'), { text: @js($url.'?mesa='.$m->numero), width: 120, height: 120, colorDark: '#ea580c', colorLight: '#ffffff' });
+            @endforeach
+        });
     </script>
     <style>@media print { body * { visibility: hidden } #qr-print, #qr-print * { visibility: visible } #qr-print { position: absolute; left: 50%; top: 80px; transform: translateX(-50%) } }</style>
     @endpush
