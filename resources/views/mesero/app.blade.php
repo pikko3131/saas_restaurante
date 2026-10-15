@@ -17,10 +17,18 @@
                 <p class="text-[11px] uppercase tracking-wide text-orange-200/80">Hola</p>
                 <h1 class="text-lg font-extrabold leading-tight">{{ auth()->user()->name }}</h1>
             </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button class="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold">Salir</button>
-            </form>
+            <div class="flex items-center gap-2">
+                @if(auth()->user()->tienePermiso('caja'))
+                    <a href="{{ route('caja.index') }}" class="rounded-lg bg-emerald-600/80 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white">💵 Caja</a>
+                @endif
+                @if(auth()->user()->tienePermiso('pos'))
+                    <a href="{{ route('pos.index') }}" class="rounded-lg bg-white/20 hover:bg-white/30 px-2.5 py-1.5 text-xs font-semibold text-white">🛒 POS</a>
+                @endif
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button class="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold">Salir</button>
+                </form>
+            </div>
         </div>
         <p class="mt-2 text-xs text-orange-100/80">Toca una mesa para tomar la orden. Cocina avisa cuando esté listo.</p>
         <div class="mt-3 grid grid-cols-3 gap-2 text-center text-xs">

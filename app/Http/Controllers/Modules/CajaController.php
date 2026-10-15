@@ -116,13 +116,6 @@ class CajaController extends Controller
                     'cambio' => $primero ? ($data['metodo_pago'] === 'efectivo' ? $cambio : null) : null,
                     'descuento_motivo' => $primero ? ($data['descuento_motivo'] ?? null) : null,
                 ]);
-                foreach ($p->items as $item) {
-                    foreach ($item->producto->recetas ?? [] as $r) {
-                        if ($r->insumo) {
-                            InsumoMovimiento::registrar($r->insumo, 'salida', (float) $r->cantidad * $item->cantidad, 'Cobro', $p->codigo, auth()->id());
-                        }
-                    }
-                }
                 $primero = false;
             }
             $mesa->update(['estado' => 'libre']);
@@ -139,6 +132,226 @@ class CajaController extends Controller
             'cambio' => $cambio,
             'motivo' => $data['descuento_motivo'] ?? null,
         ]]);
+        return redirect()->route('caja.recibo');
+    }
+
+    /** Cobro de cuenta dividida en partes iguales entre N comensales. */
+    public function cobrarParte(Request $request, Mesa $mesa)
+    {
+        if (! Caja::abiertaActual()) {
+            return back()->with('error', 'Abre la caja del día antes de cobrar.');
+        }
+
+        $data = $request->validate([
+            'personas'    => 'required|integer|min:2|max:30',
+            'metodo_pago' => 'required|in:efectivo,tarjeta,transferencia',
+            'monto'       => 'required|numeric|min:0.01',
+            'recibido'    => 'nullable|numeric|min:0',
+        ]);
+
+        $pedidos = Pedido::with('items')
+            ->where('mesa_id', $mesa->id)
+            ->whereNotIn('estado', ['pagado', 'cancelado'])
+            ->get();
+
+        $subtotal = (float) $pedidos->sum('total');
+        $totalAbonado = (float) $pedidos->sum('abonado');
+        $saldoPendiente = round($subtotal - $totalAbonado, 2);
+
+        if ($saldoPendiente <= 0 || $pedidos->isEmpty()) {
+            return back()->with('error', 'Esta mesa no tiene saldo por pagar.');
+        }
+
+        $montoCobrar = min($saldoPendiente, (float) $data['monto']);
+        $recibido = (float) ($data['recibido'] ?? $montoCobrar);
+        $cambio = $data['metodo_pago'] === 'efectivo' ? max(0, $recibido - $montoCobrar) : 0;
+
+        $primero = $pedidos->first();
+
+        Cobro::create([
+            'mesa_id'     => $mesa->id,
+            'user_id'     => auth()->id(),
+            'monto'       => $montoCobrar,
+            'metodo_pago' => $data['metodo_pago'],
+            'efectivo'    => $data['metodo_pago'] === 'efectivo' ? $montoCobrar : 0,
+            'tarjeta'     => $data['metodo_pago'] === 'tarjeta' ? $montoCobrar : 0,
+        ]);
+
+        $primero->increment('abonado', $montoCobrar);
+        $nuevoSaldo = round($saldoPendiente - $montoCobrar, 2);
+
+        if ($nuevoSaldo <= 0.05) {
+            foreach ($pedidos as $p) {
+                $p->update([
+                    'estado'      => 'pagado',
+                    'metodo_pago' => $data['metodo_pago'],
+                    'pagado_at'   => now(),
+                ]);
+            }
+            $mesa->update(['estado' => 'libre']);
+        }
+
+        session(['ultimo_recibo' => [
+            'mesa'      => $mesa->numero,
+            'ids'       => $pedidos->pluck('id')->all(),
+            'subtotal'  => $montoCobrar,
+            'descuento' => 0,
+            'propina'   => 0,
+            'total'     => $montoCobrar,
+            'metodo'    => $data['metodo_pago'],
+            'recibido'  => $recibido,
+            'cambio'    => $cambio,
+            'motivo'    => "Pago en partes (1 de {$data['personas']})",
+        ]]);
+
+        return redirect()->route('caja.recibo')->with('success', "Parte de \${$montoCobrar} cobrada. Saldo restante: \${$nuevoSaldo}");
+    }
+
+    /** Cobro de cuenta dividida seleccionando platillos específicos. */
+    public function cobrarItems(Request $request, Mesa $mesa)
+    {
+        if (! Caja::abiertaActual()) {
+            return back()->with('error', 'Abre la caja del día antes de cobrar.');
+        }
+
+        $data = $request->validate([
+            'items'           => 'required|array|min:1',
+            'items.*.id'      => 'required|integer',
+            'items.*.cantidad'=> 'required|integer|min:1',
+            'metodo_pago'     => 'required|in:efectivo,tarjeta,transferencia,mixto',
+            'pago_efectivo'   => 'nullable|numeric|min:0',
+            'pago_tarjeta'    => 'nullable|numeric|min:0',
+            'propina'         => 'nullable|numeric|min:0',
+            'descuento'       => 'nullable|numeric|min:0',
+            'recibido'        => 'nullable|numeric|min:0',
+        ]);
+
+        $pedidos = Pedido::with('items')
+            ->where('mesa_id', $mesa->id)
+            ->whereNotIn('estado', ['pagado', 'cancelado'])
+            ->get();
+
+        if ($pedidos->isEmpty()) {
+            return back()->with('error', 'Esta mesa no tiene pedidos pendientes.');
+        }
+
+        $restaurante = \App\Models\Restaurante::actual();
+        $nuevoPedido = DB::transaction(function () use ($data, $mesa, $pedidos, $restaurante) {
+            $nuevo = Pedido::create([
+                'restaurante_id' => $restaurante->id ?? auth()->user()->restaurante_id,
+                'codigo'      => Pedido::generarCodigo(),
+                'mesa_id'     => $mesa->id,
+                'user_id'     => auth()->id(),
+                'tipo'        => 'mesa',
+                'estado'      => 'pagado',
+                'metodo_pago' => $data['metodo_pago'],
+                'pagado_at'   => now(),
+                'subtotal'    => 0,
+                'impuesto'    => 0,
+                'total'       => 0,
+                'notas'       => 'Cuenta separada por platillos (Mesa ' . $mesa->numero . ')',
+            ]);
+
+            $subtotalCobrado = 0;
+
+            foreach ($data['items'] as $itemInput) {
+                $cantACobrar = (int) $itemInput['cantidad'];
+                if ($cantACobrar <= 0) continue;
+
+                foreach ($pedidos as $p) {
+                    $item = $p->items->firstWhere('id', $itemInput['id']);
+                    if (! $item) continue;
+
+                    $cant = min($cantACobrar, (int) $item->cantidad);
+                    if ($cant <= 0) continue;
+
+                    $sub = (float) $item->precio * $cant;
+                    $subtotalCobrado += $sub;
+
+                    \App\Models\PedidoItem::create([
+                        'pedido_id'       => $nuevo->id,
+                        'producto_id'     => $item->producto_id,
+                        'nombre_producto' => $item->nombre_producto,
+                        'cantidad'        => $cant,
+                        'precio'          => $item->precio,
+                        'subtotal'        => $sub,
+                        'notas'           => $item->notas,
+                        'listo'           => true,
+                    ]);
+
+                    if ($item->cantidad <= $cant) {
+                        $item->delete();
+                    } else {
+                        $item->decrement('cantidad', $cant);
+                        $item->update(['subtotal' => (float) $item->precio * (int) $item->cantidad]);
+                    }
+
+                    $cantACobrar -= $cant;
+                    if ($cantACobrar <= 0) break;
+                }
+            }
+
+            if ($subtotalCobrado <= 0) {
+                throw new \Exception('No se seleccionó ningún platillo válido.');
+            }
+
+            $desc = (float) ($data['descuento'] ?? 0);
+            $prop = (float) ($data['propina'] ?? 0);
+            $ivaRate = ((float) ($restaurante->igv ?? 0)) / 100;
+            $impuesto = round($subtotalCobrado * $ivaRate, 2);
+            $totalCobrado = max(0, round($subtotalCobrado - $desc + $impuesto + $prop, 2));
+
+            $nuevo->update([
+                'subtotal'      => $subtotalCobrado,
+                'descuento'     => $desc,
+                'impuesto'      => $impuesto,
+                'propina'       => $prop,
+                'total'         => $totalCobrado,
+                'pago_efectivo' => $data['metodo_pago'] === 'efectivo' ? $totalCobrado : ($data['pago_efectivo'] ?? 0),
+                'pago_tarjeta'  => $data['metodo_pago'] === 'tarjeta' ? $totalCobrado : ($data['pago_tarjeta'] ?? 0),
+                'recibido'      => $data['metodo_pago'] === 'efectivo' ? ($data['recibido'] ?? $totalCobrado) : null,
+                'cambio'        => $data['metodo_pago'] === 'efectivo' ? max(0, (float)($data['recibido'] ?? $totalCobrado) - $totalCobrado) : null,
+            ]);
+
+            $quedanItems = false;
+            foreach ($pedidos as $p) {
+                $itemsRestantes = $p->items()->get();
+                if ($itemsRestantes->isEmpty()) {
+                    $p->delete();
+                } else {
+                    $quedanItems = true;
+                    $nuevoSub = (float) $itemsRestantes->sum('subtotal');
+                    $nuevoImp = round($nuevoSub * $ivaRate, 2);
+                    $p->update([
+                        'subtotal' => $nuevoSub,
+                        'impuesto' => $nuevoImp,
+                        'total'    => $nuevoSub + $nuevoImp,
+                    ]);
+                }
+            }
+
+            if (! $quedanItems) {
+                $mesa->update(['estado' => 'libre']);
+            } else {
+                $mesa->update(['estado' => 'cuenta']);
+            }
+
+            return $nuevo;
+        });
+
+        session(['ultimo_recibo' => [
+            'mesa'      => $mesa->numero,
+            'ids'       => [$nuevoPedido->id],
+            'subtotal'  => (float) $nuevoPedido->subtotal,
+            'descuento' => (float) $nuevoPedido->descuento,
+            'propina'   => (float) $nuevoPedido->propina,
+            'total'     => (float) $nuevoPedido->total,
+            'metodo'    => $data['metodo_pago'],
+            'recibido'  => (float) $nuevoPedido->recibido,
+            'cambio'    => (float) $nuevoPedido->cambio,
+            'motivo'    => 'Platillos individuales',
+        ]]);
+
         return redirect()->route('caja.recibo');
     }
 

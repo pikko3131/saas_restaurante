@@ -42,11 +42,14 @@ class UsuarioController extends Controller
                 Rule::unique('users')->where('restaurante_id', $restId)->whereNull('deleted_at'),
             ],
             'role' => 'required|in:admin,cajero,mesero,cocina',
+            'permisos' => 'nullable|array',
+            'permisos.*' => 'in:caja,mesero,pos,cocina',
             'telefono' => 'nullable|string|max:30',
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
         $data['password'] = Hash::make($data['password']);
         $data['activo'] = $request->boolean('activo');
+        $data['permisos'] = $request->input('permisos', []);
         User::create($data);
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado.');
     }
@@ -66,6 +69,8 @@ class UsuarioController extends Controller
                 Rule::unique('users')->where('restaurante_id', $restId)->whereNull('deleted_at')->ignore($usuario->id),
             ],
             'role' => 'required|in:admin,cajero,mesero,cocina',
+            'permisos' => 'nullable|array',
+            'permisos.*' => 'in:caja,mesero,pos,cocina',
             'telefono' => 'nullable|string|max:30',
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
@@ -75,6 +80,7 @@ class UsuarioController extends Controller
             unset($data['password']);
         }
         $data['activo'] = $request->boolean('activo');
+        $data['permisos'] = $request->input('permisos', []);
         $usuario->update($data);
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado.');
     }

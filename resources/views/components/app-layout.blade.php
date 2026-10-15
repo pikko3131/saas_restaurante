@@ -37,13 +37,26 @@
         ]];
     }
 
-    $soloCaja = $u->role === 'cajero';
-    if ($soloCaja) {
-        $nav = [["Caja", [["caja", "Caja", "route" => "caja.index", "pattern" => "caja*", "icon" => "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 12h12l-3-3m0 6l3-3"]]]];
-    }
-    $soloCocina = $u->role === 'cocina';
-    if ($soloCocina) {
-        $nav = [["Cocina", [["cocina", "Pedidos", "route" => "cocina.index", "pattern" => "cocina*", "icon" => "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"]]]];
+    if ($u->role !== 'admin' && ! $u->isSuperAdmin()) {
+        $itemsOperativos = [];
+        if ($u->tienePermiso('caja')) {
+            $itemsOperativos[] = ['caja', 'Caja', 'route' => 'caja.index', 'pattern' => 'caja*', 'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 12h12l-3-3m0 6l3-3'];
+        }
+        if ($u->tienePermiso('pos')) {
+            $itemsOperativos[] = ['pos', 'Punto de Venta', 'route' => 'pos.index', 'pattern' => 'pos*', 'icon' => 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'];
+        }
+        if ($u->tienePermiso('mesero')) {
+            $itemsOperativos[] = ['mesero', 'Mi salón', 'route' => 'mesero.index', 'pattern' => 'mesero*', 'icon' => 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z'];
+            $itemsOperativos[] = ['mesas', 'Mesas', 'route' => 'mesas.index', 'pattern' => 'mesas*', 'icon' => 'M4 6h16M4 10h16M4 14h16M4 18h16'];
+        }
+        if ($u->tienePermiso('cocina')) {
+            $itemsOperativos[] = ['cocina', 'Cocina (KDS)', 'route' => 'cocina.index', 'pattern' => 'cocina*', 'icon' => 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z'];
+        }
+
+        $nav = [];
+        if (! empty($itemsOperativos)) {
+            $nav[] = ['Mi Turno', $itemsOperativos];
+        }
     }
 
     // Notificaciones

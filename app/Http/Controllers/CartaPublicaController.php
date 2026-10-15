@@ -107,6 +107,15 @@ class CartaPublicaController extends Controller
                 $pi->save();
 
                 $prod->increment('vendidos', $item['cantidad']);
+                if ($prod->controla_stock) {
+                    $prod->decrement('stock', $item['cantidad']);
+                }
+                $prod->loadMissing('recetas.insumo');
+                foreach ($prod->recetas ?? [] as $r) {
+                    if ($r->insumo) {
+                        \App\Models\InsumoMovimiento::registrar($r->insumo, 'salida', (float) $r->cantidad * $item['cantidad'], 'Pedido QR mesa', $pedido->codigo);
+                    }
+                }
             }
 
             $impuesto = round($subtotal * ((float) $restaurante->igv / 100), 2);

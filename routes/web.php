@@ -91,10 +91,11 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::post('/cocina/productos/{producto}/agotado', [CocinaController::class, 'agotado'])->name('cocina.agotado');
         Route::get('/caja', [CajaController::class, 'index'])->name('caja.index');
         Route::post('/caja/mesas/{mesa}/cobrar', [CajaController::class, 'cobrar'])->name('caja.cobrar');
+        Route::post('/caja/mesas/{mesa}/cobrar-parte', [CajaController::class, 'cobrarParte'])->name('caja.cobrar_parte');
+        Route::post('/caja/mesas/{mesa}/cobrar-items', [CajaController::class, 'cobrarItems'])->name('caja.cobrar_items');
         Route::post('/caja/abrir', [CajaController::class, 'abrir'])->name('caja.abrir');
         Route::post('/caja/movimiento', [CajaController::class, 'movimiento'])->name('caja.movimiento');
         Route::post('/caja/cerrar', [CajaController::class, 'cerrar'])->name('caja.cerrar');
-        Route::post('/caja/mesas/{mesa}/cobrar', [CajaController::class, 'cobrar'])->name('caja.cobrar');
         Route::get('/caja/recibo', [CajaController::class, 'recibo'])->name('caja.recibo');
         Route::post('/caja/pedidos/{pedido}/anular', [CajaController::class, 'anular'])->name('caja.anular');
         Route::get('/caja/{caja}', [CajaController::class, 'show'])->name('caja.show');
