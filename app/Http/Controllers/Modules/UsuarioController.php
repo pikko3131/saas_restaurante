@@ -13,7 +13,12 @@ class UsuarioController extends Controller
 {
     public function index(Request $request)
     {
-        $usuarios = User::when($request->q, fn ($q) => $q->where('name', 'like', "%{$request->q}%")->orWhere('email', 'like', "%{$request->q}%"))
+        $usuarios = User::when($request->q, function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
             ->latest()->paginate(12)->withQueryString();
         return view('modules.usuarios.index', compact('usuarios'));
     }

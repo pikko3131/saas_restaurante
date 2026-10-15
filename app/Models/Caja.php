@@ -73,6 +73,7 @@ class Caja extends Model
     /** Resumen financiero en vivo de la caja. */
     public function resumen(): array
     {
+        $hasta     = $this->cerrada_at ?? now();
         $ventas    = $this->ventasPorMetodo();
         $ventasTot = (float) $ventas->sum();
         $efeVentas = (float) ($ventas['efectivo'] ?? 0);

@@ -120,6 +120,8 @@ class CartaPublicaController extends Controller
         });
 
         event(new PedidoCambio($pedido->fresh(['mesa', 'items']), 'qr'));
+
+        return redirect()->route('carta.publica', $restaurante->slug)->with('pedido_ok', $pedido->codigo);
     }
 
     public function cuenta(Request $request, Restaurante $restaurante)
@@ -133,9 +135,5 @@ class CartaPublicaController extends Controller
         $mesa->update(['estado' => 'cuenta']);
         return redirect()->route('carta.publica', ['restaurante' => $restaurante->slug, 'mesa' => $numero])
             ->with('cuenta_ok', 'Cuenta pedida. Pasa a caja cuando quieras.');
-
-        return redirect()
-            ->route('carta.publica', $restaurante->slug)
-            ->with('pedido_ok', $pedido->codigo);
     }
 }

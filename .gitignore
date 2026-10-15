@@ -17,3 +17,5 @@ yarn-error.log
 /.idea
 /.vscode
 .*fuse*
+*.sql
+bk_basededatos.sql

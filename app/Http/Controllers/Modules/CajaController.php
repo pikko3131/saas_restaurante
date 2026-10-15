@@ -66,7 +66,8 @@ class CajaController extends Controller
             return back()->with('error', 'Escribe el motivo del descuento.')->withInput();
         }
         $propina = (float) ($data['propina'] ?? 0);
-        $aPagar = round($subtotal - $descuento + $propina, 2);
+        $totalAbonado = (float) $pedidos->sum('abonado');
+        $aPagar = round($subtotal - $descuento + $propina - $totalAbonado, 2);
         $recibido = (float) ($data['recibido'] ?? 0);
         $cambio = 0.0;
         $efe = (float) ($data['pago_efectivo'] ?? 0);
@@ -81,19 +82,18 @@ class CajaController extends Controller
         }
         $ahora = (float) ($data['cobrar_ahora'] ?? 0);
         if ($ahora > 0 && $ahora + 0.001 < $aPagar) {
+            $primero = $pedidos->first();
             Cobro::create([
                 'mesa_id' => $mesa->id,
                 'user_id' => auth()->id(),
                 'monto' => $ahora,
                 'metodo_pago' => $data['metodo_pago'],
-                    'pago_efectivo' => $primero ? $efe : 0,
-                    'pago_tarjeta' => $primero ? $tar : 0,
                 'efectivo' => $data['metodo_pago'] === 'efectivo' ? $ahora : ($data['metodo_pago'] === 'mixto' ? min($efe, $ahora) : 0),
-                'tarjeta' => $data['metodo_pago'] === 'tarjeta' ? $ahora : 0,
+                'tarjeta' => $data['metodo_pago'] === 'tarjeta' ? $ahora : ($data['metodo_pago'] === 'mixto' ? max(0, $ahora - min($efe, $ahora)) : 0),
             ]);
-            $primero = $pedidos->first();
             $primero->increment('abonado', $ahora);
-            return back()->with('success', 'Abono de $'.number_format($ahora, 2).' registrado. Falta $'.number_format($aPagar - $ahora - (float) $primero->abonado + $ahora, 2).'.');
+            $falta = max(0, $aPagar - $ahora);
+            return back()->with('success', 'Abono de $'.number_format($ahora, 2).' registrado. Falta $'.number_format($falta, 2).'.');
         }
         if ($data['metodo_pago'] === 'efectivo') {
             if ($recibido + 0.001 < $aPagar) {

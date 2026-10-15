@@ -19,14 +19,18 @@ class BuscarController extends Controller
         }
         $like = "%{$q}%";
 
-        $productos = Producto::where('nombre', 'like', $like)->orWhere('sku', 'like', $like)
+        $productos = Producto::where(function ($query) use ($like) {
+                $query->where('nombre', 'like', $like)->orWhere('sku', 'like', $like);
+            })
             ->take(5)->get()->map(fn ($p) => [
                 'titulo' => $p->nombre,
                 'detalle' => 'S/ '.number_format($p->precio, 2),
                 'url' => route('productos.edit', $p),
             ]);
 
-        $mesas = Mesa::where('nombre', 'like', $like)->orWhere('numero', 'like', $like)
+        $mesas = Mesa::where(function ($query) use ($like) {
+                $query->where('nombre', 'like', $like)->orWhere('numero', 'like', $like);
+            })
             ->take(5)->get()->map(fn ($m) => [
                 'titulo' => $m->nombre ?? ('Mesa '.$m->numero),
                 'detalle' => ucfirst($m->estado),
@@ -40,7 +44,9 @@ class BuscarController extends Controller
                 'url' => route('pedidos.show', $p),
             ]);
 
-        $clientes = Cliente::where('nombre', 'like', $like)->orWhere('documento', 'like', $like)
+        $clientes = Cliente::where(function ($query) use ($like) {
+                $query->where('nombre', 'like', $like)->orWhere('documento', 'like', $like);
+            })
             ->take(5)->get()->map(fn ($c) => [
                 'titulo' => $c->nombre,
                 'detalle' => $c->documento ?: ($c->telefono ?: '—'),

@@ -11,7 +11,12 @@ class ClienteController extends Controller
     public function index(Request $request)
     {
         $clientes = Cliente::withCount('pedidos')
-            ->when($request->q, fn ($q) => $q->where('nombre', 'like', "%{$request->q}%")->orWhere('documento', 'like', "%{$request->q}%"))
+            ->when($request->q, function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('nombre', 'like', "%{$search}%")
+                        ->orWhere('documento', 'like', "%{$search}%");
+                });
+            })
             ->latest()->paginate(12)->withQueryString();
         return view('modules.clientes.index', compact('clientes'));
     }
